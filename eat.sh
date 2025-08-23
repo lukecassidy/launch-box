@@ -43,10 +43,10 @@ log() {
 # does config file exist
 check_config_file() {
     if [[ ! -f "$config_file" ]]; then
-        log "ERROR: Config file $config_file not found!"
+        log "ERROR: Config file '$config_file' not found!"
         exit 1
     else
-        log "Config file $config_file found."
+        log "Config file '$config_file' found."
     fi
 }
 
@@ -71,10 +71,10 @@ open_urls() {
 
         # validate and open URL
         if is_valid_url "$url"; then
-            log "Opening URL: $url"
+            log "Opening URL: '$url'"
             open "$url"
         else
-            log "ERROR: Invalid URL - $url"
+            log "ERROR: Invalid URL - '$url'"
         fi
     done < "$config_file"
 }
@@ -106,10 +106,10 @@ open_apps() {
         # validate and open
         if [[ "$apps_section" == true ]]; then
             if is_app_installed "$line"; then
-                log "Opening application: $line"
+                log "Opening application: '$line'"
                 open -a "$line"
             else
-                log "ERROR: Application not found - $line"
+                log "ERROR: Application not found - '$line'"
             fi
         fi
     done < "$config_file"
