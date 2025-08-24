@@ -37,7 +37,7 @@ config_file="pack.config"
 
 # logger
 log() {
-    printf '%s - %s\n' "$(date +'%Y-%m-%d %H:%M:%S')" "$1"
+    printf '%s %s\n' "$(date +'%Y-%m-%d %H:%M:%S')" "$1"
 }
 
 # does config file exist
