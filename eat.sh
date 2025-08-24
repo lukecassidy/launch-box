@@ -45,6 +45,7 @@ check_config_file() {
     if [[ ! -f "$config_file" ]]; then
         log "[ERROR] Config file '$config_file' not found!"
         return 1
+    fi
     
     log "[INFO] Config file '$config_file' found."
     return 0
