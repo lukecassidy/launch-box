@@ -43,10 +43,10 @@ log() {
 # does config file exist
 check_config_file() {
     if [[ ! -f "$config_file" ]]; then
-        log "ERROR: Config file '$config_file' not found!"
+        log "[ERROR] Config file '$config_file' not found!"
         return 1
     
-    log "Config file '$config_file' found."
+    log "[INFO] Config file '$config_file' found."
     return 0
 }
 
@@ -61,7 +61,7 @@ is_valid_url() {
 
 # open URLs
 open_urls() {
-    log "Opening URLs..."
+    log "[INFO] Opening URLs..."
     while IFS= read -r url; do
         # stop reading URLs at apps section
         [[ "$url" == "# APPS" ]] && break
@@ -71,10 +71,10 @@ open_urls() {
 
         # validate and open URL
         if is_valid_url "$url"; then
-            log "Opening URL: '$url'"
+            log "[INFO] Opening URL: '$url'"
             open "$url"
         else
-            log "ERROR: Invalid URL - '$url'"
+            log "[WARNING] Invalid URL - '$url'"
         fi
     done < "$config_file"
 }
@@ -90,7 +90,7 @@ is_app_installed() {
 
 # open apps
 open_apps() {
-    log "Opening Applications..."
+    log "[INFO] Opening Applications..."
     apps_section=false
     while IFS= read -r line; do
 
@@ -106,24 +106,24 @@ open_apps() {
         # validate and open
         if [[ "$apps_section" == true ]]; then
             if is_app_installed "$line"; then
-                log "Opening application: '$line'"
+                log "[INFO] Opening application: '$line'"
                 open -a "$line"
             else
-                log "ERROR: Application not found - '$line'"
+                log "[WARNING] Application not found - '$line'"
             fi
         fi
     done < "$config_file"
 }
 
 main() {
-    log "Unpacking l(a)unch box."
+    log "[INFO] Unpacking l(a)unch box."
     check_config_file || exit 1
-    log "Nom nom nom."
+    log "[INFO] Nom nom nom."
     open_urls
-    log "Nom nom nom nom."
+    log "[INFO] Nom nom nom nom."
     open_apps
-    log "Nom nom nom nom nom."
-    log "Finished."
+    log "[INFO] Nom nom nom nom nom."
+    log "[INFO] Finished."
 }
 
 # l(a)unch time!
