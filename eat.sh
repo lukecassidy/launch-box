@@ -44,10 +44,10 @@ log() {
 check_config_file() {
     if [[ ! -f "$config_file" ]]; then
         log "ERROR: Config file '$config_file' not found!"
-        exit 1
-    else
-        log "Config file '$config_file' found."
-    fi
+        return 1
+    
+    log "Config file '$config_file' found."
+    return 0
 }
 
 # validate URLs
@@ -117,7 +117,7 @@ open_apps() {
 
 main() {
     log "Unpacking l(a)unch box."
-    check_config_file
+    check_config_file || exit 1
     log "Nom nom nom."
     open_urls
     log "Nom nom nom nom."
