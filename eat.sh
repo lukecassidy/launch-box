@@ -54,7 +54,20 @@ EOF
 }
 
 parse_args() {
-  # placeholder
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -c|--config)
+                # flag and value required
+                [[ $# -lt 2 ]] && { log "[ERROR] Missing value for $1"; usage; exit 2; }
+                config_file="$2"; shift 2 ;;
+            -d|--dry-run)
+                DRY_RUN=true; shift ;;
+            -h|--help)
+                usage; exit 0 ;;
+            *)
+                log "[ERROR] Unknown option: $1"; usage; exit 2 ;;
+        esac
+    done
 }
 
 # does config file exist
