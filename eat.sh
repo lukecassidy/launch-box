@@ -3,24 +3,12 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 ###############################################################################
-# Script Name: 
-#     eat.sh
-#
 # Description:
 #     This script reads a config file that contains URLs and local mac app
 #     names. It opens the URLs in the default browser and launches the apps
-#     listed in the file.
+#     listed in the file. See README.md for more information.
 #
-# Configuration File Format:
-#     Urls and apps are listed one per line, split into sections.
-#
-# Usage:
-#     ./eat.sh
-#     ./eat.sh -c <config_file>
-#
-# TODO:
-#     Convert config file to yaml or json.
-#     Add section for app configuration. Example: iTerm2 panes.
+# Usage: ./eat.sh --help
 ###############################################################################
 
 # defaults
