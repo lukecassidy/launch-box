@@ -2,7 +2,7 @@
 
 Open your daily tabs and apps on macOS with one command, powered by a small, simple config file.
 
-Every morning, you probably open the same browser tabs and launch the same apps. This repo contains a small Bash script, `eat.sh`, that reads a simple config and opens everything for you.
+Every morning, you probably open the same browser tabs and launch the same apps. This repo contains a small bash script that reads a simple config and opens everything for you.
 
 ## Install
 ```bash
