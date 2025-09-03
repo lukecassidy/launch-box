@@ -16,28 +16,45 @@ IFS=$'\n\t'
 #
 # Usage:
 #     ./eat.sh
-#
-# Example Config File (pack.config):
-#     # URLs
-#     https://tinyurl.com/muywa6ax
-#     https://www.google.com
-#
-#     # APPS
-#     Visual Studio Code
-#     Slack
+#     ./eat.sh -c <config_file>
 #
 # TODO:
 #     Convert config file to yaml or json.
 #     Add section for app configuration. Example: iTerm2 panes.
-#     Tidy up logic around file reading.
 ###############################################################################
 
-# config file
-config_file="pack.config"
+# defaults
+config_file="box.config"
+DRY_RUN=false
 
 # logger
 log() {
     printf '%s %s\n' "$(date +'%Y-%m-%d %H:%M:%S')" "$1"
+}
+
+usage() {
+    cat >&2 <<EOF
+Usage: $(basename "$0") [options]
+
+Options:
+  -c, --config <file>   Path to config file (default: ${config_file})
+  -d, --dry-run         Print actions without opening anything
+  -h, --help            Show this help and exit
+
+Config format:
+  # URLs
+  https://tinyurl.com/muywa6ax
+  https://www.google.com
+
+  # APPS
+  Visual Studio Code
+  Slack
+
+EOF
+}
+
+parse_args() {
+  # placeholder
 }
 
 # does config file exist
@@ -73,7 +90,11 @@ open_urls() {
         # validate and open URL
         if is_valid_url "$url"; then
             log "[INFO] Opening URL: '$url'"
-            open "$url"
+            if [[ "$DRY_RUN" == true ]]; then
+                : # null command
+            else
+                open "$url"
+            fi
         else
             log "[WARNING] Invalid URL - '$url'"
         fi
@@ -101,14 +122,17 @@ open_apps() {
             continue
         fi
 
-        # ignore empty lines and comments
-        [[ -z "$line" || "$line" =~ ^#.*$ ]] && continue
-
+    # ignore empty lines and comments
+    [[ -z "$line" || "$line" =~ ^#.*$ ]] && continue
         # validate and open
         if [[ "$apps_section" == true ]]; then
             if is_app_installed "$line"; then
                 log "[INFO] Opening application: '$line'"
-                open -a "$line"
+                if [[ "$DRY_RUN" == true ]]; then
+                    : # no-op
+                else
+                    open -a "$line"
+                fi
             else
                 log "[WARNING] Application not found - '$line'"
             fi
@@ -117,6 +141,7 @@ open_apps() {
 }
 
 main() {
+    parse_args "$@"
     log "[INFO] Unpacking l(a)unch box."
     check_config_file || exit 1
     log "[INFO] Nom nom nom."
@@ -128,4 +153,4 @@ main() {
 }
 
 # l(a)unch time!
-main
+main "$@"
