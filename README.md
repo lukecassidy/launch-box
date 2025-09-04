@@ -23,7 +23,6 @@ https://github.com/notifications
 
 # APPS
 Visual Studio Code
-Google Chrome
 Slack
 Spotify
 Notion
