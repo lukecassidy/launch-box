@@ -35,7 +35,6 @@ Notes:
 ## Usage
 Flags
 - `-c, --config <file>`  Use a specific config file
-- `--config=FILE`        Alternate form for setting the config path
 - `-d, --dry-run`        Print actions without opening anything
 - `-h, --help`           Show usage
 
