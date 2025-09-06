@@ -31,12 +31,12 @@ Options:
 
 Config format:
   # URLs
-  https://tinyurl.com/muywa6ax
+  https://tinyurl.com/muywa6ax   # optional inline comment
   https://www.google.com
 
   # APPS
-  Visual Studio Code
-  Slack
+  Visual Studio Code   # editor
+  Slack                # chat
 
 EOF
 }
@@ -64,7 +64,7 @@ check_config_file() {
         log "[ERROR] Config file '$config_file' not found!"
         return 1
     fi
-    
+
     log "[INFO] Config file '$config_file' found."
     return 0
 }
@@ -85,19 +85,24 @@ open_urls() {
         # stop reading URLs at apps section
         [[ "$url" == "# APPS" ]] && break
 
-        # ignore empty lines and comments
-        [[ -z "$url" || "$url" =~ ^#.*$ ]] && continue
+        # ignore full comments and empty lines
+        [[ -z "$url" || "$url" =~ ^[[:space:]]*#.*$ ]] && continue
+
+        # strip inline comments and whitespace 
+        cleaned="${url%%#*}"
+        cleaned="$(echo "$cleaned" | xargs)"
+        [[ -z "$cleaned" ]] && continue
 
         # validate and open URL
-        if is_valid_url "$url"; then
-            log "[INFO] Opening URL: '$url'"
+        if is_valid_url "$cleaned"; then
+            log "[INFO] Opening URL: '$cleaned'"
             if [[ "$DRY_RUN" == true ]]; then
                 : # null command
             else
-                open "$url"
+                open "$cleaned"
             fi
         else
-            log "[WARNING] Invalid URL - '$url'"
+            log "[WARNING] Invalid URL - '$cleaned'"
         fi
     done < "$config_file"
 }
@@ -116,26 +121,31 @@ open_apps() {
     log "[INFO] Opening Applications..."
     apps_section=false
     while IFS= read -r line; do
-
-        # start reading apps at apps section
+        # start reading apps at apps section (check raw line)
         if [[ "$line" == "# APPS" ]]; then
             apps_section=true
             continue
         fi
 
-    # ignore empty lines and comments
-    [[ -z "$line" || "$line" =~ ^#.*$ ]] && continue
-        # validate and open
+        # ignore full comments and empty lines
+        [[ -z "$line" || "$line" =~ ^[[:space:]]*#.*$ ]] && continue
+
         if [[ "$apps_section" == true ]]; then
-            if is_app_installed "$line"; then
-                log "[INFO] Opening application: '$line'"
+
+            # strip inline comments and whitespace
+            cleaned="${line%%#*}"
+            cleaned="$(echo "$cleaned" | xargs)"
+            [[ -z "$cleaned" ]] && continue
+
+            if is_app_installed "$cleaned"; then
+                log "[INFO] Opening application: '$cleaned'"
                 if [[ "$DRY_RUN" == true ]]; then
                     : # no-op
                 else
-                    open -a "$line"
+                    open -a "$cleaned"
                 fi
             else
-                log "[WARNING] Application not found - '$line'"
+                log "[WARNING] Application not found - '$cleaned'"
             fi
         fi
     done < "$config_file"
@@ -155,3 +165,4 @@ main() {
 
 # l(a)unch time!
 main "$@"
+
