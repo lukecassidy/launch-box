@@ -89,7 +89,7 @@ open_urls() {
         [[ -z "$url" || "$url" =~ ^[[:space:]]*#.*$ ]] && continue
 
         # strip inline comments and whitespace 
-        cleaned="${url%%#*}"
+        local cleaned="${url%%#*}"
         cleaned="$(echo "$cleaned" | xargs)"
         [[ -z "$cleaned" ]] && continue
 
@@ -119,7 +119,7 @@ is_app_installed() {
 # open apps
 open_apps() {
     log "[INFO] Opening Applications..."
-    apps_section=false
+    local apps_section=false
     while IFS= read -r line; do
         # start reading apps at apps section (check raw line)
         if [[ "$line" == "# APPS" ]]; then
@@ -133,7 +133,7 @@ open_apps() {
         if [[ "$apps_section" == true ]]; then
 
             # strip inline comments and whitespace
-            cleaned="${line%%#*}"
+            local cleaned="${line%%#*}"
             cleaned="$(echo "$cleaned" | xargs)"
             [[ -z "$cleaned" ]] && continue
 
