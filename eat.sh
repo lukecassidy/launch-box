@@ -60,12 +60,12 @@ parse_args() {
 
 # does config file exist
 check_config_file() {
-    if [[ ! -f "$config_file" ]]; then
-        log "[ERROR] Config file '$config_file' not found!"
+    if [[ ! -f "$1" ]]; then
+        log "[ERROR] Config file '$1' not found!"
         return 1
     fi
 
-    log "[INFO] Config file '$config_file' found."
+    log "[INFO] Config file '$1' found."
     return 0
 }
 
@@ -104,7 +104,7 @@ open_urls() {
         else
             log "[WARNING] Invalid URL - '$cleaned'"
         fi
-    done < "$config_file"
+    done < "$1"
 }
 
 # check if an app installed
@@ -148,17 +148,17 @@ open_apps() {
                 log "[WARNING] Application not found - '$cleaned'"
             fi
         fi
-    done < "$config_file"
+    done < "$1"
 }
 
 main() {
     parse_args "$@"
     log "[INFO] Unpacking l(a)unch box."
-    check_config_file || exit 1
+    check_config_file "$config_file" || exit 1
     log "[INFO] Nom nom nom."
-    open_urls
+    open_urls "$config_file"
     log "[INFO] Nom nom nom nom."
-    open_apps
+    open_apps "$config_file"
     log "[INFO] Nom nom nom nom nom."
     log "[INFO] Finished."
 }
