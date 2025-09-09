@@ -12,7 +12,7 @@ IFS=$'\n\t'
 ###############################################################################
 
 # defaults
-config_file="box.config"
+readonly DEFAULT_CONFIG="box.config"
 DRY_RUN=false
 
 # logger
@@ -25,7 +25,7 @@ usage() {
 Usage: $(basename "$0") [options]
 
 Options:
-  -c, --config <file>   Path to config file (default: ${config_file})
+  -c, --config <file>   Path to config file (default: ${DEFAULT_CONFIG})
   -d, --dry-run         Print actions without opening anything
   -h, --help            Show this help and exit
 
@@ -42,12 +42,13 @@ EOF
 }
 
 parse_args() {
+    local cfg="${DEFAULT_CONFIG}"
     while [[ $# -gt 0 ]]; do
         case "$1" in
             -c|--config)
                 # flag and value required
                 [[ $# -lt 2 ]] && { log "[ERROR] Missing value for $1"; usage; exit 2; }
-                config_file="$2"; shift 2 ;;
+                cfg="$2"; shift 2 ;;
             -d|--dry-run)
                 DRY_RUN=true; shift ;;
             -h|--help)
@@ -56,6 +57,7 @@ parse_args() {
                 log "[ERROR] Unknown option: $1"; usage; exit 2 ;;
         esac
     done
+    printf '%s\n' "$cfg"
 }
 
 # does config file exist
@@ -152,7 +154,8 @@ open_apps() {
 }
 
 main() {
-    parse_args "$@"
+    local config_file
+    config_file="$(parse_args "$@")"
     log "[INFO] Unpacking l(a)unch box."
     check_config_file "$config_file" || exit 1
     log "[INFO] Nom nom nom."
@@ -165,4 +168,3 @@ main() {
 
 # l(a)unch time!
 main "$@"
-
