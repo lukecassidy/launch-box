@@ -13,7 +13,7 @@ IFS=$'\n\t'
 
 # defaults
 readonly DEFAULT_CONFIG="box.config"
-DRY_RUN=false
+DRY_RUN=0
 
 # logger
 log() {
@@ -50,7 +50,7 @@ parse_args() {
                 [[ $# -lt 2 ]] && { log "[ERROR] Missing value for $1"; usage; exit 2; }
                 cfg="$2"; shift 2 ;;
             -d|--dry-run)
-                DRY_RUN=true; shift ;;
+                DRY_RUN=1; shift ;;
             -h|--help)
                 usage; exit 0 ;;
             *)
@@ -98,7 +98,7 @@ open_urls() {
         # validate and open URL
         if is_valid_url "$cleaned"; then
             log "[INFO] Opening URL: '$cleaned'"
-            if [[ "$DRY_RUN" == true ]]; then
+            if (( $DRY_RUN )); then
                 : # null command
             else
                 open "$cleaned"
@@ -141,7 +141,7 @@ open_apps() {
 
             if is_app_installed "$cleaned"; then
                 log "[INFO] Opening application: '$cleaned'"
-                if [[ "$DRY_RUN" == true ]]; then
+                if (( "$DRY_RUN" )); then
                     : # no-op
                 else
                     open -a "$cleaned"
