@@ -11,10 +11,6 @@ IFS=$'\n\t'
 # Usage: ./eat.sh --help
 ###############################################################################
 
-# defaults
-readonly DEFAULT_CONFIG="box.config"
-DRY_RUN=0
-
 # logger
 log() {
     printf '%s %s\n' "$(date +'%Y-%m-%d %H:%M:%S')" "$1"
@@ -25,7 +21,7 @@ usage() {
 Usage: $(basename "$0") [options]
 
 Options:
-  -c, --config <file>   Path to config file (default: ${DEFAULT_CONFIG})
+  -c, --config <file>   Path to config file (default: box.config)
   -d, --dry-run         Print actions without opening anything
   -h, --help            Show this help and exit
 
@@ -42,22 +38,22 @@ EOF
 }
 
 parse_args() {
-    local cfg="${DEFAULT_CONFIG}"
+    local cfg="box.config"
+    local dry=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
             -c|--config)
-                # flag and value required
                 [[ $# -lt 2 ]] && { log "[ERROR] Missing value for $1"; usage; exit 2; }
                 cfg="$2"; shift 2 ;;
             -d|--dry-run)
-                DRY_RUN=1; shift ;;
+                dry=1; shift ;;
             -h|--help)
                 usage; exit 0 ;;
             *)
                 log "[ERROR] Unknown option: $1"; usage; exit 2 ;;
         esac
     done
-    printf '%s\n' "$cfg"
+    printf '%s %s\n' "$cfg" "$dry"
 }
 
 # does config file exist
@@ -82,6 +78,7 @@ is_valid_url() {
 
 # open URLs
 open_urls() {
+    local cfg="$1" dry="$2"
     log "[INFO] Opening URLs..."
     while IFS= read -r url; do
         # stop reading URLs at apps section
@@ -98,15 +95,15 @@ open_urls() {
         # validate and open URL
         if is_valid_url "$cleaned"; then
             log "[INFO] Opening URL: '$cleaned'"
-            if (( $DRY_RUN )); then
-                : # null command
+            if (( dry )); then
+                : # null command (dry run)
             else
                 open "$cleaned"
             fi
         else
             log "[WARNING] Invalid URL - '$cleaned'"
         fi
-    done < "$1"
+    done < "$cfg"
 }
 
 # check if an app installed
@@ -120,6 +117,7 @@ is_app_installed() {
 
 # open apps
 open_apps() {
+    local cfg="$1" dry="$2"
     log "[INFO] Opening Applications..."
     local apps_section=false
     while IFS= read -r line; do
@@ -141,8 +139,8 @@ open_apps() {
 
             if is_app_installed "$cleaned"; then
                 log "[INFO] Opening application: '$cleaned'"
-                if (( "$DRY_RUN" )); then
-                    : # no-op
+                if (( dry )); then
+                    : # no-op (dry run)
                 else
                     open -a "$cleaned"
                 fi
@@ -150,18 +148,18 @@ open_apps() {
                 log "[WARNING] Application not found - '$cleaned'"
             fi
         fi
-    done < "$1"
+    done < "$cfg"
 }
 
 main() {
-    local config_file
-    config_file="$(parse_args "$@")"
+    local config_file dry_run
+    read -r config_file dry_run < <(parse_args "$@")
     log "[INFO] Unpacking l(a)unch box."
     check_config_file "$config_file" || exit 1
     log "[INFO] Nom nom nom."
-    open_urls "$config_file"
+    open_urls "$config_file" "$dry_run"
     log "[INFO] Nom nom nom nom."
-    open_apps "$config_file"
+    open_apps "$config_file" "$dry_run"
     log "[INFO] Nom nom nom nom nom."
     log "[INFO] Finished."
 }
