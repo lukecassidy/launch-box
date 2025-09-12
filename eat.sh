@@ -88,7 +88,7 @@ open_urls() {
         [[ -z "$url" || "$url" =~ ^[[:space:]]*#.*$ ]] && continue
 
         # strip inline comments and whitespace 
-        local cleaned="${url%%#*}"
+        local cleaned="${url%%[[:space:]]#*}"
         cleaned="$(echo "$cleaned" | xargs)"
         [[ -z "$cleaned" ]] && continue
 
@@ -133,7 +133,7 @@ open_apps() {
         if [[ "$apps_section" == true ]]; then
 
             # strip inline comments and whitespace
-            local cleaned="${line%%#*}"
+            local cleaned="${line%%[[:space:]]#*}"
             cleaned="$(echo "$cleaned" | xargs)"
             [[ -z "$cleaned" ]] && continue
 
