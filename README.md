@@ -19,13 +19,14 @@ The default config file is `box.config` in the project root. It has two sections
 # URLs
 https://calendar.google.com/calendar/u/0/r/week
 https://mail.google.com/mail/u/0/#inbox
-https://github.com/notifications
+https://github.com/notifications # optional inline comment
 
 # APPS
-Visual Studio Code
-Slack
+Visual Studio Code   # editor
+Slack                # chat
 Spotify
 Notion
+
 ```
 
 Notes:
