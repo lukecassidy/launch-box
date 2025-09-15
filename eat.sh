@@ -183,7 +183,7 @@ configure_apps() {
                 if (( dry )); then
                     : # no-op (dry run)
                 else
-                    source "plugins/$cleaned".sh
+                    source "plugins/$cleaned.sh"
                 fi
             else
                 log "[WARNING] Plugin script not found - '$cleaned'"
