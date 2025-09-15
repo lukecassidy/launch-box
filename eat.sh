@@ -32,6 +32,10 @@ Config format:
   # APPS
   Visual Studio Code   # editor
   Slack                # chat
+  iTerm
+
+  # PLUGINS
+  iTerm.sh             # custom script for app configuration
 
 EOF
 }
@@ -150,6 +154,42 @@ open_apps() {
     done < "$cfg"
 }
 
+configure_apps() {
+    local cfg="$1" dry="$2"
+    log "[INFO] Configuring Applications..."
+    local plugins_section=false
+    while IFS= read -r line; do
+        # start reading plugins at plugins section (check raw line)
+        if [[ "$line" == "# PLUGINS" ]]; then
+            plugins_section=true
+            continue
+        fi
+
+        # ignore full comments and empty lines
+        [[ -z "$line" || "$line" =~ ^[[:space:]]*#.*$ ]] && continue
+
+        if [[ "$plugins_section" == true ]]; then
+
+            # strip inline comments and whitespace
+            local cleaned="${line%%[[:space:]]#*}"
+            cleaned="$(echo "$cleaned" | xargs)"
+            [[ -z "$cleaned" ]] && continue
+
+            # check if plugin script exists
+            if [[ -f "plugins/$cleaned.sh" ]]; then
+                log "[INFO] Running plugin script: '$cleaned'"
+                if (( dry )); then
+                    : # no-op (dry run)
+                else
+                    source "plugins/$cleaned".sh
+                fi
+            else
+                log "[WARNING] Plugin script not found - '$cleaned'"
+            fi
+        fi
+    done < "$cfg"
+}
+
 main() {
     local config_file dry_run
     read -r config_file dry_run < <(parse_args "$@")
@@ -160,6 +200,8 @@ main() {
     log "[INFO] Nom nom nom nom."
     open_apps "$config_file" "$dry_run"
     log "[INFO] Nom nom nom nom nom."
+    configure_apps "$config_file" "$dry_run"
+    log "[INFO] Nom nom nom nom nom nom."
     log "[INFO] Finished."
 }
 

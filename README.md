@@ -24,8 +24,11 @@ https://github.com/notifications # optional inline comment
 # APPS
 Visual Studio Code   # editor
 Slack                # chat
-Spotify
-Notion
+iTerm
+
+# PLUGINS
+iTerm                # custom script for app configuration
+
 
 ```
 

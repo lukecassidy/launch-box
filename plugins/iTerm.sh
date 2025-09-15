@@ -1,1 +1,1 @@
-echo 'configure app here'
+echo 'iTerm configuration here'
