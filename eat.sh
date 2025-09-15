@@ -129,6 +129,9 @@ open_apps() {
             continue
         fi
 
+        # stop reading APPS at plugins section
+        [[ "$line" == "# PLUGINS" ]] && break
+
         # ignore full comments and empty lines
         [[ -z "$line" || "$line" =~ ^[[:space:]]*#.*$ ]] && continue
 
