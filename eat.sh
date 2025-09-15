@@ -90,9 +90,8 @@ open_urls() {
         # ignore full comments and empty lines
         [[ -z "$url" || "$url" =~ ^[[:space:]]*#.*$ ]] && continue
 
-        # strip inline comments and whitespace 
-        local cleaned="${url%%[[:space:]]#*}"
-        cleaned="$(echo "$cleaned" | xargs)"
+        local cleaned
+        cleaned=$(clean_line "$url")
         [[ -z "$cleaned" ]] && continue
 
         # validate and open URL
@@ -136,8 +135,8 @@ open_apps() {
         if [[ "$apps_section" == true ]]; then
 
             # strip inline comments and whitespace
-            local cleaned="${line%%[[:space:]]#*}"
-            cleaned="$(echo "$cleaned" | xargs)"
+            local cleaned
+            cleaned=$(clean_line "$line")
             [[ -z "$cleaned" ]] && continue
 
             if is_app_installed "$cleaned"; then
@@ -171,8 +170,8 @@ configure_apps() {
         if [[ "$plugins_section" == true ]]; then
 
             # strip inline comments and whitespace
-            local cleaned="${line%%[[:space:]]#*}"
-            cleaned="$(echo "$cleaned" | xargs)"
+            local cleaned
+            cleaned=$(clean_line "$line")
             [[ -z "$cleaned" ]] && continue
 
             # check if plugin script exists
@@ -188,6 +187,12 @@ configure_apps() {
             fi
         fi
     done < "$cfg"
+}
+
+clean_line() {
+    local line="$1"
+    line="${line%%[[:space:]]#*}"   # strip inline comments
+    echo "$line" | xargs            # trim whitespace
 }
 
 main() {
