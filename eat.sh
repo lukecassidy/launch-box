@@ -10,9 +10,10 @@ set -Eeuo pipefail
 # Usage: ./eat.sh --help
 ###############################################################################
 
-# logger
+# logging
 log() {
-    printf '%s %s\n' "$(date +'%Y-%m-%d %H:%M:%S')" "$1"
+    local level="$1"; shift
+    printf '[%s] %s %s\n' "$level" "$(date +'%Y-%m-%d %H:%M:%S')" "$*"
 }
 
 usage() {
@@ -46,14 +47,14 @@ parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
             -c|--config)
-                [[ $# -lt 2 ]] && { log "[ERROR] Missing value for $1"; usage; exit 2; }
+                [[ $# -lt 2 ]] && { log ERROR "Missing value for $1"; usage; exit 2; }
                 cfg="$2"; shift 2 ;;
             -d|--dry-run)
                 dry=1; shift ;;
             -h|--help)
                 usage; exit 0 ;;
             *)
-                log "[ERROR] Unknown option: $1"; usage; exit 2 ;;
+                log ERROR "Unknown option: $1"; usage; exit 2 ;;
         esac
     done
     printf '%s %s\n' "$cfg" "$dry"
@@ -62,11 +63,11 @@ parse_args() {
 # does config file exist
 check_config_file() {
     if [[ ! -f "$1" ]]; then
-        log "[ERROR] Config file '$1' not found!"
+        log ERROR "Config file '$1' not found!"
         return 1
     fi
 
-    log "[INFO] Config file '$1' found."
+    log INFO "Config file '$1' found."
     return 0
 }
 
@@ -82,7 +83,7 @@ is_valid_url() {
 # open URLs
 open_urls() {
     local cfg="$1" dry="$2"
-    log "[INFO] Opening URLs..."
+    log INFO "Opening URLs..."
     while IFS= read -r url; do
         # stop reading URLs at apps section
         [[ "$url" == "# APPS" ]] && break
@@ -96,14 +97,14 @@ open_urls() {
 
         # validate and open URL
         if is_valid_url "$cleaned"; then
-            log "[INFO] Opening URL: '$cleaned'"
+            log INFO "Opening URL: '$cleaned'"
             if (( dry )); then
                 : # null command (dry run)
             else
                 open "$cleaned"
             fi
         else
-            log "[WARNING] Invalid URL - '$cleaned'"
+            log WARNING "Invalid URL - '$cleaned'"
         fi
     done < "$cfg"
 }
@@ -120,7 +121,7 @@ is_app_installed() {
 # open apps
 open_apps() {
     local cfg="$1" dry="$2"
-    log "[INFO] Opening Applications..."
+    log INFO "Opening Applications..."
     local apps_section=false
     while IFS= read -r line; do
         # start reading apps at apps section (check raw line)
@@ -143,14 +144,14 @@ open_apps() {
             [[ -z "$cleaned" ]] && continue
 
             if is_app_installed "$cleaned"; then
-                log "[INFO] Opening application: '$cleaned'"
+                log INFO "Opening application: '$cleaned'"
                 if (( dry )); then
                     : # no-op (dry run)
                 else
                     open -a "$cleaned"
                 fi
             else
-                log "[WARNING] Application not found - '$cleaned'"
+                log WARNING "Application not found - '$cleaned'"
             fi
         fi
     done < "$cfg"
@@ -158,7 +159,7 @@ open_apps() {
 
 configure_apps() {
     local cfg="$1" dry="$2"
-    log "[INFO] Configuring Applications..."
+    log INFO "Configuring Applications..."
     local plugins_section=false
     while IFS= read -r line; do
         # start reading plugins at plugins section (check raw line)
@@ -179,14 +180,14 @@ configure_apps() {
 
             # check if plugin script exists
             if [[ -f "plugins/$cleaned.sh" ]]; then
-                log "[INFO] Running plugin script: '$cleaned'"
+                log INFO "Running plugin script: '$cleaned'"
                 if (( dry )); then
                     : # no-op (dry run)
                 else
                     source "plugins/$cleaned.sh"
                 fi
             else
-                log "[WARNING] Plugin script not found - '$cleaned'"
+                log WARNING "Plugin script not found - '$cleaned'"
             fi
         fi
     done < "$cfg"
@@ -201,16 +202,16 @@ clean_line() {
 main() {
     local config_file dry_run
     read -r config_file dry_run < <(parse_args "$@")
-    log "[INFO] Unpacking l(a)unch box."
+    log INFO "Unpacking l(a)unch box."
     check_config_file "$config_file" || exit 1
-    log "[INFO] Nom nom nom."
+    log INFO "Nom nom nom."
     open_urls "$config_file" "$dry_run"
-    log "[INFO] Nom nom nom nom."
+    log INFO "Nom nom nom nom."
     open_apps "$config_file" "$dry_run"
-    log "[INFO] Nom nom nom nom nom."
+    log INFO "Nom nom nom nom nom."
     configure_apps "$config_file" "$dry_run"
-    log "[INFO] Nom nom nom nom nom nom."
-    log "[INFO] Finished."
+    log INFO "Nom nom nom nom nom nom."
+    log INFO "Finished."
 }
 
 # l(a)unch time!
