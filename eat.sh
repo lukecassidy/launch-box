@@ -13,6 +13,8 @@ set -Eeuo pipefail
 # logging
 log() {
     local level="$1"; shift
+
+    # format: [LEVEL] YYYY-MM-DD HH:MM:SS message
     printf '[%s] %s %s\n' "$level" "$(date +'%Y-%m-%d %H:%M:%S')" "$*"
 }
 
@@ -41,6 +43,7 @@ Config format:
 EOF
 }
 
+# parse command line arguments
 parse_args() {
     local cfg="box.config"
     local dry=0
@@ -80,6 +83,22 @@ is_valid_url() {
     fi
 }
 
+# check if an app installed
+is_app_installed() {
+    if ! open -Ra "$1" >/dev/null 2>&1; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+# strip inline comments and trim whitespace from a line
+clean_line() {
+    local line="$1"
+    line="${line%%[[:space:]]#*}"
+    echo "$line" | xargs
+}
+
 # open URLs
 open_urls() {
     local cfg="$1" dry="$2"
@@ -109,16 +128,7 @@ open_urls() {
     done < "$cfg"
 }
 
-# check if an app installed
-is_app_installed() {
-    if ! open -Ra "$1" >/dev/null 2>&1; then
-        return 1
-    else
-        return 0
-    fi
-}
-
-# open apps
+# launch apps
 open_apps() {
     local cfg="$1" dry="$2"
     log INFO "Opening Applications..."
@@ -157,6 +167,7 @@ open_apps() {
     done < "$cfg"
 }
 
+# configure apps via plugins
 configure_apps() {
     local cfg="$1" dry="$2"
     log INFO "Configuring Applications..."
@@ -191,12 +202,6 @@ configure_apps() {
             fi
         fi
     done < "$cfg"
-}
-
-clean_line() {
-    local line="$1"
-    line="${line%%[[:space:]]#*}"   # strip inline comments
-    echo "$line" | xargs            # trim whitespace
 }
 
 main() {
