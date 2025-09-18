@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
-echo "Merging all Visual Studio Code 'mac' windows..."
+log INFO "Merging all Visual Studio Code 'mac' windows..."
 
 # Merge all Visual Studio Code windows
 osascript <<'EOF'
@@ -17,4 +17,4 @@ tell application "System Events"
 end tell
 EOF
 
-echo "Requested VS Code to merge all windows."
+log INFO "Requested VS Code to merge all windows."
