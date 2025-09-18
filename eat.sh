@@ -54,7 +54,7 @@ parse_args() {
                 log ERROR "Unknown option: $1"; usage; exit 2 ;;
         esac
     done
-    printf '%s %s\n' "$cfg" "$dry"
+    log INFO "config: $cfg" "dry-run: $dry"
 }
 
 # does config file exist
