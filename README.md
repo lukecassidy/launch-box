@@ -2,7 +2,7 @@
 
 Open your daily tabs and apps on macOS with one command, powered by a small, simple config file.
 
-Every morning, you probably open the same browser tabs and launch the same apps. This repo contains a small bash script that reads a simple config and opens everything for you.
+Every morning, you probably open the same browser tabs, launch the same apps and configure them in the same layout. This repo contains a small bash script that reads a simple config and opens and arranges everything for you.
 
 ## Install
 ```bash
@@ -12,7 +12,7 @@ chmod +x eat.sh
 ```
 
 ## Configuration
-The default config file is `box.config` in the project root. It has two sections: `# URLs` and `# APPS`. Lines starting with `#` and blank lines are ignored.
+The default config file is `box.config` in the project root. It has three sections: `# URLs`, `# APPS` and `# PLUGINS`. Lines starting with `#` and blank lines are ignored.
 
 `box.config`:
 ```text
@@ -28,12 +28,13 @@ iTerm
 
 # PLUGINS
 iTerm                # custom script for app configuration
+layout               # window layout
 
 
 ```
 
 Notes:
-- App names should match what you see in `/Applications` (e.g., `Visual Studio Code`, `Google Chrome`, `iTerm2`).
+- App names should match what you see in `/Applications` (e.g., `Visual Studio Code`, `Google Chrome`, `Slack`).
 - The script validates apps with `open -Ra` before launching and will log a warning if an app is not found.
 
 ## Usage
