@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
-echo 'iTerm configuration script running...'
+log INFO 'iTerm configuration script running...'
 
 # Create two horizontal panes and run test commands
 osascript <<'EOF'
