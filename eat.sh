@@ -40,7 +40,8 @@ EOF
 
 # parse command line arguments
 parse_args() {
-    local cfg="box.config"
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local cfg="$script_dir/box.config"
     local dry=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -195,12 +196,13 @@ configure_apps() {
             [[ -z "$cleaned" ]] && continue
 
             # check if plugin script exists
-            if [[ -f "plugins/$cleaned.sh" ]]; then
+            local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+            if [[ -f "$script_dir/plugins/$cleaned.sh" ]]; then
                 log INFO "Running plugin script: '$cleaned'"
                 if (( dry )); then
                     : # no-op (dry run)
                 else
-                    source "plugins/$cleaned.sh"
+                    source "$script_dir/plugins/$cleaned.sh"
                 fi
             else
                 log WARNING "Plugin script not found - '$cleaned'"
