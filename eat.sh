@@ -208,8 +208,10 @@ main() {
     check_config_file "$config_file" || exit 1
     log INFO "Nom nom nom."
     open_urls "$config_file" "$dry_run"
+    sleep 2 # wait for URLs to open
     log INFO "Nom nom nom nom."
     open_apps "$config_file" "$dry_run"
+    sleep 2 # wait for apps to launch
     log INFO "Nom nom nom nom nom."
     configure_apps "$config_file" "$dry_run"
     log INFO "Nom nom nom nom nom nom."
