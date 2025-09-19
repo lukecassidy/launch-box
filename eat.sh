@@ -54,11 +54,14 @@ parse_args() {
                 log ERROR "Unknown option: $1"; usage; exit 2 ;;
         esac
     done
-    log INFO "config: $cfg" "dry-run: $dry"
+
+    # Output parsed vals to stdout for caller capture.
+    echo "$cfg $dry"
 }
 
 # does config file exist
 check_config_file() {
+    log INFO "Checking config file '$1'..."
     if [[ ! -f "$1" ]]; then
         log ERROR "Config file '$1' not found!"
         return 1
