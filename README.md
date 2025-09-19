@@ -58,8 +58,11 @@ Examples:
 
 ## TODO
 - [ ] Expand layout script to handle differnt monitor setups.
-- [ ] Expand iTerm config. 
-- [ ] Support multiple Chrome profiles.  
-- [ ] Make plugins more user friendly (currently hardcoded to my setup).  
-- [ ] Add checks for required dependencies.  
+- [ ] Expand iTerm config.
+- [ ] Support multiple Chrome profiles.
+- [ ] Make plugins more user friendly (currently hardcoded to my setup).
+- [ ] Add checks for required dependencies.
+- [ ] Add instructions for script to run automatically on startup.
+
+**Note**: This project is a work in progress. Just a bit of fun I started after realising I manually open the same tabs and apps every day, then spend about 5 minutes rearranging windows.
 
