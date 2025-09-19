@@ -81,13 +81,20 @@ is_valid_url() {
     fi
 }
 
-# check if an app installed
-is_app_installed() {
-    if ! open -Ra "$1" >/dev/null 2>&1; then
+# check if core dependencies are installed
+check_core_dependencies() {
+    local missing=0
+    dependencies=(open xargs)
+    for dep in "${dependencies[@]}"; do
+        is_cmd_installed "$dep" || missing=1
+        deps+=("$dep")
+    done
+
+    if (( missing )); then
+        log ERROR "Missing core dependencies: ${deps[*]}"
         return 1
-    else
-        return 0
     fi
+    return 0
 }
 
 # strip inline comments and trim whitespace from a line
@@ -206,6 +213,7 @@ main() {
     local config_file dry_run
     read -r config_file dry_run < <(parse_args "$@")
     log INFO "Unpacking l(a)unch box."
+    check_core_dependencies || exit 1
     check_config_file "$config_file" || exit 1
     log INFO "Nom nom nom."
     open_urls "$config_file" "$dry_run"
