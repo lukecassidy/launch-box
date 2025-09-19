@@ -55,3 +55,11 @@ Examples:
 # Dry run
 ./eat.sh -d
 ```
+
+## TODO
+- [ ] Expand layout script to handle differnt monitor setups.
+- [ ] Expand iTerm config. 
+- [ ] Support multiple Chrome profiles.  
+- [ ] Make plugins more user friendly (currently hardcoded to my setup).  
+- [ ] Add checks for required dependencies.  
+
