@@ -56,10 +56,30 @@ Examples:
 ./eat.sh -d
 ```
 
+Alright, here’s a more casual rewrite of that section, keeping it simple and friendly:
+
+
+---
+
+## Run When You Need It
+
+There are lots of different ways to run it from here. You can fire off eat.sh straight from the terminal. You could configure the script to run on startup. Another approach is to pop a button in the macOS menu bar and run it when you need it. I like this approach so I'll outline it here. 
+
+### Add a Menu Bar Button (using Shortcuts)
+1. Open the Shortcuts app.
+2. Make a new shortcut → add Run Shell Script.
+3. Drop in the full path to your script, e.g.:
+/Users/you/my-launch-box/eat.sh
+4. In the shortcut settings, turn on 'Pin in Menu Bar'.
+
+That’s it. Now you've got button in your menu bar that kicks everything off with one click 🌯.
+
+---
+
 ## TODO
 - [ ] Add gif of usage to README.md.  
-- [ ] Add instructions for script to run automatically on startup.  
-- [ ] Add checks for required dependencies.  
+- [x] Add instructions for script to run on menu bar click.  
+- [x] Add checks for required dependencies.  
 - [ ] Expand iTerm config.  
 - [ ] Support multiple Chrome profiles.  
 - [ ] Make plugins more user friendly (currently hardcoded to my setup).  
