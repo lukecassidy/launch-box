@@ -32,7 +32,8 @@ Config format:
   iTerm
 
   # PLUGINS
-  iTerm.sh             # custom script for app configuration
+  iTerm       # Run plugin script to configure iTerm (split panes, run commands etc)
+  layout      # Run plugin script to arrange windows/screens
 
 EOF
 }

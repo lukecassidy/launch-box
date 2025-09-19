@@ -1,5 +1,9 @@
 #!/bin/bash
 
+###############################################################################
+# iTerm config script to create panes and run commands
+###############################################################################
+
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 log INFO 'iTerm configuration script running...'
 

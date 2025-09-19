@@ -1,5 +1,9 @@
 #!/bin/bash
 
+###############################################################################
+# Merge all Visual Studio Code 'mac' windows into a single window
+###############################################################################
+
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 log INFO "Merging all Visual Studio Code 'mac' windows..."
 
