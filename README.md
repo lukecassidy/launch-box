@@ -24,11 +24,11 @@ https://github.com/notifications # optional inline comment
 # APPS
 Visual Studio Code   # editor
 Slack                # chat
-iTerm
+iTerm                # terminal
 
 # PLUGINS
-iTerm       # Run plugin script to configure iTerm (split panes, run commands etc)
-layout      # Run plugin script to arrange windows/screens
+iTerm       # run plugin script to configure iTerm (split panes, run commands etc)
+layout      # run plugin script to arrange windows/screens
 
 ```
 
@@ -55,9 +55,6 @@ Examples:
 # Dry run
 ./eat.sh -d
 ```
-
-Alright, here’s a more casual rewrite of that section, keeping it simple and friendly:
-
 
 ---
 
