@@ -77,13 +77,11 @@ That’s it. Now you've got button in your menu bar that kicks everything off wi
 ---
 
 ## TODO
-- [x] Add instructions for script to run on menu bar click.  
-- [x] Add checks for required dependencies.  
 - [ ] Add gif of usage to README.md.
-- [ ] Expand iTerm config.  
-- [ ] Support multiple Chrome profiles.  
-- [ ] Make plugins more user friendly (currently hardcoded to my setup).  
-- [ ] Expand layout script to handle different monitor setups.  
+- [ ] Expand iTerm config.
+- [ ] Support multiple Chrome profiles.
+- [ ] Make plugins more user friendly (currently hardcoded to my setup).
+- [ ] Expand layout script to handle different monitor setups.
 
 **Note**: This project is a work in progress. Just a bit of fun I started after realising I manually open the same tabs and apps every day, then spend about 5 minutes rearranging windows.
 
