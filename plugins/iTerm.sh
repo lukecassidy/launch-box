@@ -32,6 +32,10 @@ tell application "iTerm"
         tell session 2 of newTab
             write text "echo 'Pane 2'"
         end tell
+        delay 0.5
+        tell session 3 of newTab
+            write text "echo 'Pane 3'"
+        end tell
     end tell
 end tell
 EOF
