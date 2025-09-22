@@ -213,18 +213,35 @@ configure_apps() {
 
 main() {
     local config_file dry_run
-    read -r config_file dry_run < <(parse_args "$@")
     log INFO "Unpacking l(a)unch box."
-    check_core_dependencies || exit 1
-    check_config_file "$config_file" || exit 1
+
+    # parse command line arguments
+    read -r config_file dry_run < <(parse_args "$@")
+
+    log INFO "Checking core dependencies..."
+    if ! check_core_dependencies; then
+        exit 1
+    fi
+
+    log INFO "Checking config file: '$config_file'..."
+    if ! check_config_file "$config_file"; then
+        exit 1
+    fi
+
+    # open URLs
     log INFO "Nom nom nom."
     open_urls "$config_file" "$dry_run"
     sleep 2 # wait for URLs to open
+
+    # open apps
     log INFO "Nom nom nom nom."
     open_apps "$config_file" "$dry_run"
     sleep 2 # wait for apps to launch
+
+    # configure apps
     log INFO "Nom nom nom nom nom."
     configure_apps "$config_file" "$dry_run"
+
     log INFO "Nom nom nom nom nom nom."
     log INFO "Finished."
 }
