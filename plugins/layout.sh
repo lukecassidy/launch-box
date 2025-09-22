@@ -11,11 +11,11 @@ log INFO "Layout plugin running..."
 # check dependencies and skip if missing
 if ! is_cmd_installed "lua"; then
     log ERROR "Skipping layout: lua not installed"
-    return 0
+    exit_or_return 0
 fi
 if ! is_app_installed "Hammerspoon"; then
     log ERROR "Skipping layout: Hammerspoon not installed"
-    return 0
+    exit_or_return 0
 fi
 
 

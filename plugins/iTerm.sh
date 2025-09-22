@@ -5,16 +5,17 @@
 ###############################################################################
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+
 log INFO 'iTerm configuration script running...'
 
 # check dependencies and skip if missing
 if ! is_cmd_installed "osascript"; then
     log ERROR "Skipping iTerm configuration: osascript not installed"
-    return 0
+    exit_or_return 0
 fi
 if ! is_app_installed "iTerm"; then
     log ERROR "Skipping iTerm configuration: iTerm not installed"
-    return 0
+    exit_or_return 0
 fi
 
 
@@ -62,3 +63,6 @@ if ! osascript <<'EOF'; then
         end tell
     end tell
 EOF
+    log ERROR "Failed to configure iTerm panes via AppleScript"
+    exit_or_return 1
+fi
