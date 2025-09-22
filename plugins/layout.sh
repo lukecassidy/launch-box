@@ -2,6 +2,8 @@
 
 ###############################################################################
 # Apply window layout via Hammerspoon
+#
+# Requires Hammerspoon CLI (`hs`) to be installed.
 ###############################################################################
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
@@ -20,4 +22,9 @@ fi
 
 
 log INFO "Applying window layout via Hammerspoon..."
-hs -c "applyWorkspace()"
+if hs -c "applyWorkspace()"; then
+    log INFO "Requested Hammerspoon to apply workspace layout."
+else
+    log ERROR "Failed to apply Hammerspoon workspace layout."
+    exit_or_return 1
+fi
