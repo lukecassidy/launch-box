@@ -18,7 +18,7 @@ if ! is_app_installed "iTerm"; then
 fi
 
 
-# Create two horizontal panes and run test commands
+# Create three horizontal panes and run test commands
 osascript <<'EOF'
 tell application "iTerm"
     activate
@@ -31,6 +31,7 @@ tell application "iTerm"
         delay 0.5
         tell session 2 of newTab
             write text "echo 'Pane 2'"
+            split vertically with default profile
         end tell
         delay 0.5
         tell session 3 of newTab
