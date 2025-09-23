@@ -65,6 +65,48 @@ EOF
     fi
 }
 
+is_url_open_in_chrome() {
+    local url="$1"
+    local escaped_url="${url//\"/\\\"}"
+    local result
+
+    if ! result=$(osascript <<EOF 2>/dev/null
+if application "Google Chrome" is running then
+    tell application "Google Chrome"
+        repeat with w in windows
+            repeat with t in tabs of w
+                try
+                    if (URL of t as string) is "${escaped_url}" then return true
+                end try
+            end repeat
+        end repeat
+    end tell
+end if
+return false
+EOF
+    ); then
+        return 1
+    fi
+
+    if [[ "$result" == "true" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+is_url_open() {
+    local url="$1"
+
+    # TODO: add support for other browsers
+    # TODO: add support for multiple chrome profiles
+    if is_url_open_in_chrome "$url"; then
+        return 0
+    fi
+
+    return 1
+}
+
 # is CLI command installed
 is_cmd_installed() {
     if ! command -v "$1" >/dev/null 2>&1; then

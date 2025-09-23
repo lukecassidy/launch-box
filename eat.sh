@@ -122,6 +122,11 @@ open_urls() {
 
         # validate and open URL
         if is_valid_url "$cleaned"; then
+            if is_url_open "$cleaned"; then
+                log INFO "URL already open: '$cleaned'"
+                continue
+            fi
+
             log INFO "Opening URL: '$cleaned'"
             if (( dry )); then
                 : # null command (dry run)
