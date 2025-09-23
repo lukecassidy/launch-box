@@ -241,7 +241,6 @@ main() {
     # open URLs
     log INFO "Nom nom nom."
     open_urls "$config_file" "$dry_run"
-    sleep 2 # wait for URLs to open
 
     # open apps
     log INFO "Nom nom nom nom."
