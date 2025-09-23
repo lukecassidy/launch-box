@@ -65,6 +65,7 @@ EOF
     fi
 }
 
+# is the url already open in google chrome
 is_url_open_in_chrome() {
     local url="$1"
     local escaped_url="${url//\"/\\\"}"
@@ -95,11 +96,11 @@ EOF
     fi
 }
 
+# is the url already open in any supported browser
 is_url_open() {
     local url="$1"
 
-    # TODO: add support for other browsers
-    # TODO: add support for multiple chrome profiles
+    # TODO: add support here for other browsers
     if is_url_open_in_chrome "$url"; then
         return 0
     fi
