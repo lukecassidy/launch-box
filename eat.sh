@@ -160,6 +160,11 @@ open_apps() {
             [[ -z "$cleaned" ]] && continue
 
             if is_app_installed "$cleaned"; then
+                if is_app_running "$cleaned"; then
+                    log INFO "Application already running: '$cleaned'"
+                    continue
+                fi
+
                 log INFO "Opening application: '$cleaned'"
                 if (( dry )); then
                     : # no-op (dry run)

@@ -37,6 +37,34 @@ is_app_installed() {
     fi
 }
 
+# is app running
+is_app_running() {
+    local app="$1"
+
+    # Escape any double quotes in the app name to safely embed inside AppleScript
+    local escaped_app="${app//\"/\\\"}"
+
+    local result
+
+    # Use osascript to check for a running process
+    if ! result=$(osascript <<EOF 2>/dev/null
+tell application "System Events"
+    return (exists process "${escaped_app}")
+end tell
+EOF
+    ); then
+        # If osascript fails, treat as not running
+        return 1
+    fi
+
+    # AppleScript returns 'true' or 'false'
+    if [[ "$result" == "true" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # is CLI command installed
 is_cmd_installed() {
     if ! command -v "$1" >/dev/null 2>&1; then
