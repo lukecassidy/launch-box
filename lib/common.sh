@@ -100,7 +100,6 @@ EOF
 is_url_open() {
     local url="$1"
 
-    # TODO: add support here for other browsers
     if is_url_open_in_chrome "$url"; then
         return 0
     fi

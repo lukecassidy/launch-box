@@ -22,7 +22,7 @@ fi
 
 
 log INFO "Applying window layout via Hammerspoon..."
-if hs -c "applyWorkspace()"; then
+if /opt/homebrew/bin/hs -c "applyWorkspace()"; then
     log INFO "Requested Hammerspoon to apply workspace layout."
 else
     log ERROR "Failed to apply Hammerspoon workspace layout."
