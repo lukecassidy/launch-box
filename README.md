@@ -80,5 +80,5 @@ That’s it. Now you've got button in your menu bar that kicks everything off wi
 - [ ] Make plugins more user friendly (currently hardcoded to my setup).
 - [ ] Expand layout script to handle different monitor setups.
 
-**Note**: This project is a work in progress. Just a bit of fun I started after realising I manually open the same tabs and apps every day, then spend about 5 minutes rearranging windows.
+**Note**: This project started as a small experiment after I noticed I was manually opening the same tabs and apps every day, then spending five minutes rearranging windows. I kept chipping away at it once I realised it had quietly become part of my morning routine.
 
