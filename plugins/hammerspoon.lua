@@ -14,11 +14,9 @@ local layouts = {
     single = {
         ["Built-in Retina Display"] = {
             { app = "code",          slot = "left" },
-
-            { app = "Slack",   slot = "tr3" },
-            { app = "iTerm", slot = "mr3" },
-            { app = "ChatGPT", slot = "br3" },
-
+            { app = "Slack",         slot = "tr3" },
+            { app = "iTerm",         slot = "mr3" },
+            { app = "Google Chrome", slot = "br3" },
         },
     },
 
