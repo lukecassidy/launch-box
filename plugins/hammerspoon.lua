@@ -11,40 +11,40 @@ local layouts = {
     -- Single-monitor (laptop only)
     single = {
         ["Built-in Retina Display"] = {
-            { app = "code",          slot = "left" },
-            { app = "Slack",         slot = "tr3" },
-            { app = "iTerm",         slot = "mr3" },
-            { app = "Google Chrome", slot = "br3" },
+            { slot = "lft_half_all", app = "code" },
+            { slot = "rgt_thrd_top", app = "Slack" },
+            { slot = "rgt_thrd_mid", app = "iTerm" },
+            { slot = "rgt_thrd_bot", app = "Google Chrome" },
         },
     },
 
     -- Dual-monitor (laptop + one external)
     dual = {
         ["Built-in Retina Display"] = {
-            { app = "Slack",   slot = "left" },
-            { app = "Spotify", slot = "tr" },
-            { app = "iTerm",   slot = "br" },
+            { slot = "lft_half_all", app = "Slack" },
+            { slot = "rgt_qrtr_top", app = "Spotify" },
+            { slot = "rgt_qrtr_bot", app = "iTerm" },
         },
         ["LS27D60xU"] = {
-            { app = "code",          slot = "left" },
-            { app = "Google Chrome", slot = "right" },
+            { slot = "lft_half_all", app = "code" },
+            { slot = "rgt_half_all", app = "Google Chrome" },
         },
     },
 
     -- Triple-monitor (laptop + two externals)
     triple = {
         ["Built-in Retina Display"] = {
-            { app = "Slack",   slot = "left" },
-            { app = "Spotify", slot = "right" },
+            { slot = "lft_half_all", app = "Slack" },
+            { slot = "rgt_half_all", app = "Spotify" },
         },
         ["LS27D60xU (1)"] = {
-            { app = "code",          slot = "left" },
-            { app = "Google Chrome", slot = "right" },
+            { slot = "lft_half_all", app = "code" },
+            { slot = "rgt_half_all", app = "Google Chrome" },
         },
         ["LS27D60xU (2)"] = {
-            { app = "iTerm",   slot = "left" },
-            { app = "ChatGPT", slot = "tr" },
-            { app = "Notion",  slot = "br" },
+            { slot = "lft_half_all", app = "iTerm" },
+            { slot = "rgt_qrtr_top", app = "ChatGPT" },
+            { slot = "rgt_qrtr_bot", app = "Notion" },
         },
     },
 }
@@ -52,19 +52,19 @@ local layouts = {
 -- Presets for window positions
 local rects = {
     -- Halves
-    left  = hs.geometry.rect(0, 0,   0.5, 1),
-    right = hs.geometry.rect(0.5, 0, 0.5, 1),
+    lft_half_all = hs.geometry.rect(0,   0,   0.5, 1),
+    rgt_half_all = hs.geometry.rect(0.5, 0,   0.5, 1),
 
     -- Quarters
-    tl    = hs.geometry.rect(0, 0,   0.5, 0.5),
-    tr    = hs.geometry.rect(0.5, 0, 0.5, 0.5),
-    bl    = hs.geometry.rect(0, 0.5, 0.5, 0.5),
-    br    = hs.geometry.rect(0.5, 0.5, 0.5, 0.5),
+    lft_qrtr_top = hs.geometry.rect(0,   0,   0.5, 0.5),
+    lft_qrtr_bot = hs.geometry.rect(0,   0.5, 0.5, 0.5),
+    rgt_qrtr_top = hs.geometry.rect(0.5, 0,   0.5, 0.5),
+    rgt_qrtr_bot = hs.geometry.rect(0.5, 0.5, 0.5, 0.5),
 
-    -- Right-side thirds (split vertically)
-    tr3 = hs.geometry.rect(0.5, 0,     0.5, 1/3),
-    mr3 = hs.geometry.rect(0.5, 1/3,   0.5, 1/3),
-    br3 = hs.geometry.rect(0.5, 2/3,   0.5, 1/3),
+    -- Right-side thirds
+    rgt_thrd_top = hs.geometry.rect(0.5, 0,     0.5, 1/3),
+    rgt_thrd_mid = hs.geometry.rect(0.5, 1/3,   0.5, 1/3),
+    rgt_thrd_bot = hs.geometry.rect(0.5, 2/3,   0.5, 1/3),
 }
 
 -- Screen mapper
