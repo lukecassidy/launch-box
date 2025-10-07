@@ -3,8 +3,6 @@
 --   open /Applications/Hammerspoon.app
 --   Enable Accessibility permissions for Hammerspoon in:
 --       System Preferences > Security & Privacy > Privacy > Accessibility
--- TODO: symlink from plugins/hammerspoon.lua to ~/.hammerspoon/init.lua
-
 hs.ipc.cliInstall()
 
 -- Layouts for different monitor setups
