@@ -10,33 +10,48 @@
 
 hs.ipc.cliInstall()
 
--- Layout config
-local workspace = {
-    -- Get exact names using `hs.screen.allScreens()`
-    -- TODO: give friendly names to screens
-    ["Built-in Retina Display"] = {
-        { app = "Slack",   slot = "left" },
-        { app = "Spotify", slot = "right" },
+-- Layouts for different monitor setups
+local layouts = {
+
+    -- Single-monitor (laptop only)
+    single = {
+        ["Built-in Retina Display"] = {
+            { app = "code",          slot = "left" },
+            { app = "Google Chrome", slot = "tr" },
+            { app = "iTerm",         slot = "br" },
+        },
     },
-    ["LS27D60xU (1)"] = {
-        { app = "Google Chrome", slot = "left" },
-        { app = "code",          slot = "right" },
+
+    -- Dual-monitor (laptop + one external)
+    dual = {
+        ["Built-in Retina Display"] = {
+            { app = "Slack",   slot = "left" },
+            { app = "Spotify", slot = "tr" },
+            { app = "iTerm",   slot = "br" },
+        },
+        ["LS27D60xU"] = {
+            { app = "code",          slot = "left" },
+            { app = "Google Chrome", slot = "right" },
+        },
     },
-    ["LS27D60xU (2)"] = {
-        { app = "iTerm",   slot = "left" },
-        { app = "ChatGPT", slot = "tr" },
-        { app = "Notion",  slot = "br" },
+
+    -- Triple-monitor (laptop + two externals)
+    triple = {
+        ["Built-in Retina Display"] = {
+            { app = "Slack",   slot = "left" },
+            { app = "Spotify", slot = "right" },
+        },
+        ["LS27D60xU"] = {
+            { app = "code",          slot = "left" },
+            { app = "Google Chrome", slot = "right" },
+        },
+        ["LS27D60xU (2)"] = {
+            { app = "iTerm",   slot = "left" },
+            { app = "ChatGPT", slot = "tr" },
+            { app = "Notion",  slot = "br" },
+        },
     },
 }
-
--- Screen mapper
-local function getScreens()
-    local map = {}
-    for _, s in ipairs(hs.screen.allScreens()) do
-        map[s:name()] = s
-    end
-    return map
-end
 
 -- Presets for window positions
 local rects = {
@@ -47,6 +62,15 @@ local rects = {
     bl    = hs.geometry.rect(0, 0.5, 0.5, 0.5),
     br    = hs.geometry.rect(0.5, 0.5, 0.5, 0.5),
 }
+
+-- Screen mapper
+local function getScreens()
+    local map = {}
+    for _, s in ipairs(hs.screen.allScreens()) do
+        map[s:name()] = s
+    end
+    return map
+end
 
 -- Window mover - Finds app, launches if needed, moves/resizes
 local function moveApp(appName, screen, slot)
@@ -95,7 +119,7 @@ end
 -- Apply the configured workspace
 function applyWorkspace()
     local screens = getScreens()
-    for screenName, layout in pairs(workspace) do
+    for screenName, layout in pairs(layouts['triple']) do
         local screen = screens[screenName]
         placeWindows(screen, layout)
     end
