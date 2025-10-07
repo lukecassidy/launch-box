@@ -3,7 +3,9 @@
 ###############################################################################
 # Apply window layout via Hammerspoon
 #
-# Requires Hammerspoon CLI (`hs`) to be installed.
+# Requires:
+#   - Hammerspoon app installed
+#   - Hammerspoon CLI hs installed (`hs.ipc.cliInstall()`)
 ###############################################################################
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
@@ -30,6 +32,22 @@ if [[ "$(readlink "$target_cfg")" != "$(realpath "$repo_cfg")" ]]; then
     ln -sf "$(realpath "$repo_cfg")" "$target_cfg"
 else
     log INFO "Hammerspoon config link already correct."
+fi
+
+# Ensure Hammerspoon is running
+if ! pgrep -x "Hammerspoon" >/dev/null; then
+    log INFO "Starting Hammerspoon..."
+    open -a Hammerspoon
+    sleep 2
+fi
+
+# Reload Hammerspoon config to pick up any changes
+log INFO "Reloading Hammerspoon config..."
+if /opt/homebrew/bin/hs -c "hs.reload()" >/dev/null 2>&1; then
+    log INFO "Hammerspoon config reloaded successfully."
+    sleep 1
+else
+    log ERROR "Failed to reload Hammerspoon config."
 fi
 
 # Apply layout
