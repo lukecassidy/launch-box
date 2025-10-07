@@ -14,8 +14,11 @@ local layouts = {
     single = {
         ["Built-in Retina Display"] = {
             { app = "code",          slot = "left" },
-            { app = "Google Chrome", slot = "tr" },
-            { app = "iTerm",         slot = "br" },
+
+            { app = "Slack",   slot = "tr3" },
+            { app = "iTerm", slot = "mr3" },
+            { app = "ChatGPT", slot = "br3" },
+
         },
     },
 
@@ -52,12 +55,20 @@ local layouts = {
 
 -- Presets for window positions
 local rects = {
+    -- Halves
     left  = hs.geometry.rect(0, 0,   0.5, 1),
     right = hs.geometry.rect(0.5, 0, 0.5, 1),
+
+    -- Quarters
     tl    = hs.geometry.rect(0, 0,   0.5, 0.5),
     tr    = hs.geometry.rect(0.5, 0, 0.5, 0.5),
     bl    = hs.geometry.rect(0, 0.5, 0.5, 0.5),
     br    = hs.geometry.rect(0.5, 0.5, 0.5, 0.5),
+
+    -- Right-side thirds (split vertically)
+    tr3 = hs.geometry.rect(0.5, 0,     0.5, 1/3),
+    mr3 = hs.geometry.rect(0.5, 1/3,   0.5, 1/3),
+    br3 = hs.geometry.rect(0.5, 2/3,   0.5, 1/3),
 }
 
 -- Screen mapper
@@ -100,7 +111,7 @@ local function moveApp(appName, screen, slot)
 
     if win:isFullScreen() then win:setFullScreen(false) end
     win:moveToScreen(screen)
-    win:moveToUnit(rect)
+    win:moveToUnit(rect, screen:fullFrame()) -- includes menu bar area
 
     -- Debug output to console
     hs.printf("Moved %s -> %s:%s", appName, screen:name(), slot)
