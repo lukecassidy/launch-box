@@ -3,9 +3,6 @@
 --   open /Applications/Hammerspoon.app
 --   Enable Accessibility permissions for Hammerspoon in:
 --       System Preferences > Security & Privacy > Privacy > Accessibility
---   Place this file in ~/.hammerspoon/init.lua
---   Trigger via hotkey or from a (TODO) shell script (layout.sh)
--- TODO: work with different screen numbers / arrangements
 -- TODO: symlink from plugins/hammerspoon.lua to ~/.hammerspoon/init.lua
 
 hs.ipc.cliInstall()
@@ -41,7 +38,7 @@ local layouts = {
             { app = "Slack",   slot = "left" },
             { app = "Spotify", slot = "right" },
         },
-        ["LS27D60xU"] = {
+        ["LS27D60xU (1)"] = {
             { app = "code",          slot = "left" },
             { app = "Google Chrome", slot = "right" },
         },
@@ -116,10 +113,15 @@ local function placeWindows(screen, layout)
     end
 end
 
--- Apply the configured workspace
-function applyWorkspace()
+-- Apply the configured workspace.
+function applyWorkspace(screenMode)
     local screens = getScreens()
-    for screenName, layout in pairs(layouts['triple']) do
+    local screenCount = #hs.screen.allScreens()
+
+    -- Auto-detect layout mode based on number of screens if not provided
+    screenMode = screenMode or ({ [2]="dual", [3]="triple" })[screenCount] or "single"
+
+    for screenName, layout in pairs(layouts[screenMode]) do
         local screen = screens[screenName]
         placeWindows(screen, layout)
     end
@@ -127,4 +129,4 @@ function applyWorkspace()
 end
 
 -- Trigger via hotkey (cmd+alt+ctrl+L) or from shell script
-hs.hotkey.bind({"cmd","alt","ctrl"}, "L", applyWorkspace)
+hs.hotkey.bind({"cmd","alt","ctrl"}, "L", function() applyWorkspace() end)
