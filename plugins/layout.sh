@@ -6,6 +6,10 @@
 # Requires:
 #   - Hammerspoon app installed
 #   - Hammerspoon CLI hs installed (`hs.ipc.cliInstall()`)
+# Install:
+#       brew install --cask hammerspoon
+#       Enable Accessibility permissions for Hammerspoon in:
+#           System Preferences > Security & Privacy > Privacy > Accessibility
 ###############################################################################
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"

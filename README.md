@@ -74,11 +74,8 @@ That’s it. Now you've got button in your menu bar that kicks everything off wi
 ---
 
 ## TODO
-- [ ] Add gif of usage to README.md.
-- [ ] Expand iTerm config.
 - [ ] Support multiple Chrome profiles.
-- [ ] Make plugins more user friendly (currently hardcoded to my setup).
-- [ ] Expand layout script to handle different monitor setups.
+- [ ] Move monitor layout to main config file.
 
 **Note**: This project started as a small experiment after I noticed I was manually opening the same tabs and apps every day, then spending five minutes rearranging windows. I kept chipping away at it once I realised it had quietly become part of my morning routine.
 
