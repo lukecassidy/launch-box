@@ -76,6 +76,7 @@ That’s it. Now you've got button in your menu bar that kicks everything off wi
 ## TODO
 - [ ] Support multiple Chrome profiles.
 - [ ] Move monitor layout to main config file.
+- [ ] Update config file type.
 
 **Note**: This project started as a small experiment after I noticed I was manually opening the same tabs and apps every day, then spending five minutes rearranging windows. I kept chipping away at it once I realised it had quietly become part of my morning routine.
 
