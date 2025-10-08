@@ -45,13 +45,11 @@ if ! pgrep -x "Hammerspoon" >/dev/null; then
     sleep 2
 fi
 
-# Reload Hammerspoon config to pick up any changes
-log INFO "Reloading Hammerspoon config..."
-if /opt/homebrew/bin/hs -c "hs.reload()" >/dev/null 2>&1; then
-    log INFO "Hammerspoon config reloaded successfully."
-    sleep 1
-else
-    log ERROR "Failed to reload Hammerspoon config."
+# Wait for Hammerspoon IPC to become available
+log INFO "Waiting for Hammerspoon IPC to become available..."
+if ! /opt/homebrew/bin/hs -c "return 'ok'" >/dev/null 2>&1; then
+    log ERROR "Hammerspoon IPC not available."
+    exit_or_return 1
 fi
 
 # Apply layout
