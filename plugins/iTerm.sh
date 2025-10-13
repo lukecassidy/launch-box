@@ -54,10 +54,10 @@ if ! osascript <<'EOF'; then
             end tell
 
             tell pane2
-                write text "echo \"$(kubectl config current-context):$(kubectl config view --minify --output 'jsonpath={..namespace}' || echo default)\""
+                write text "clear; echo \"K8s: $(kubectl config current-context):$(kubectl config view --minify --output 'jsonpath={..namespace}' || echo default)\""
                 set pane3 to (split vertically with default profile)
                 tell pane3
-                    write text "aws sts get-caller-identity"
+                    write text "clear; aws login"
                 end tell
             end tell
         end tell
