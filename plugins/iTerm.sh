@@ -21,6 +21,10 @@ fi
 
 # Create a three-pane workspace (top plus two lower panes) and run starter commands
 if ! osascript <<'EOF'; then
+    set pane1Command to "clear"
+    set pane2Command to "clear; echo \"K8s: $(kubectl config current-context):$(kubectl config view --minify --output 'jsonpath={..namespace}' || echo default)\""
+    set pane3Command to "clear; echo \"AWS: ${$(aws_prompt_info):-default}\""
+
     tell application "iTerm"
         activate
 
@@ -49,15 +53,15 @@ if ! osascript <<'EOF'; then
 
             set pane1 to current session of workingTab
             tell pane1
-                write text "clear"
+                write text pane1Command
                 set pane2 to (split horizontally with default profile)
             end tell
 
             tell pane2
-                write text "clear; echo \"K8s: $(kubectl config current-context):$(kubectl config view --minify --output 'jsonpath={..namespace}' || echo default)\""
+                write text pane2Command
                 set pane3 to (split vertically with default profile)
                 tell pane3
-                    write text "clear; echo \"AWS: ${$(aws_prompt_info):-default}\""
+                    write text pane3Command
                 end tell
             end tell
         end tell
