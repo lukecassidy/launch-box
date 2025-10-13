@@ -40,26 +40,20 @@ if ! osascript <<'EOF'; then
         set targetWindow to missing value
         set workingTab to missing value
 
-        if (count of windows) = 0 then
+        try
+            set targetWindow to current window
+        end try
+
+        if targetWindow is missing value then
             set targetWindow to (create window with default profile)
             set workingTab to current tab of targetWindow
         else
-            set targetWindow to current window
-            if targetWindow is missing value then
-                set targetWindow to (create window with default profile)
-                set workingTab to current tab of targetWindow
-            else
-                tell targetWindow
-                    set workingTab to (create tab with default profile)
-                end tell
-            end if
+            tell targetWindow
+                set workingTab to (create tab with default profile)
+            end tell
         end if
 
         tell targetWindow
-            if workingTab is missing value then
-                set workingTab to current tab
-            end if
-
             set pane1 to current session of workingTab
             tell pane1
                 write text pane1Command
