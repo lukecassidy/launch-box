@@ -19,11 +19,20 @@ if ! is_app_installed "iTerm"; then
 fi
 
 
+# commands to run in each pane
+pane1_command='clear'
+pane2_command='clear; echo "K8s: $(kubectl config current-context):$(kubectl config view --minify --output '\''jsonpath={..namespace}'\'' || echo default)"'
+pane3_command='clear; echo "AWS: ${$(aws_prompt_info):-default}"'
+
+export PANE1_COMMAND="$pane1_command"
+export PANE2_COMMAND="$pane2_command"
+export PANE3_COMMAND="$pane3_command"
+
 # Create a three-pane workspace (top plus two lower panes) and run starter commands
 if ! osascript <<'EOF'; then
-    set pane1Command to "clear"
-    set pane2Command to "clear; echo \"K8s: $(kubectl config current-context):$(kubectl config view --minify --output 'jsonpath={..namespace}' || echo default)\""
-    set pane3Command to "clear; echo \"AWS: ${$(aws_prompt_info):-default}\""
+    set pane1Command to system attribute "PANE1_COMMAND"
+    set pane2Command to system attribute "PANE2_COMMAND"
+    set pane3Command to system attribute "PANE3_COMMAND"
 
     tell application "iTerm"
         activate
