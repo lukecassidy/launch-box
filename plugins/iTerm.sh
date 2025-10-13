@@ -49,7 +49,7 @@ if ! osascript <<'EOF'; then
 
             set pane1 to current session of workingTab
             tell pane1
-                write text "k9s"
+                write text "clear"
                 set pane2 to (split horizontally with default profile)
             end tell
 
@@ -57,7 +57,7 @@ if ! osascript <<'EOF'; then
                 write text "clear; echo \"K8s: $(kubectl config current-context):$(kubectl config view --minify --output 'jsonpath={..namespace}' || echo default)\""
                 set pane3 to (split vertically with default profile)
                 tell pane3
-                    write text "clear; aws login"
+                    write text "clear; echo \"AWS: ${$(aws_prompt_info):-default}\""
                 end tell
             end tell
         end tell
