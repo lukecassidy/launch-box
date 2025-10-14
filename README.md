@@ -1,4 +1,4 @@
-# my‑l(a)unch‑box
+# l(a)unch‑box
 
 Open your daily tabs and apps on macOS with one command, powered by a small, simple config file.
 
@@ -6,8 +6,8 @@ Every morning, you probably open the same browser tabs, launch the same apps, co
 
 ## Install
 ```bash
-git clone https://github.com/lukecassidy/my-launch-box.git
-cd my-launch-box
+git clone https://github.com/lukecassidy/launch-box.git
+cd launch-box
 chmod +x eat.sh
 ```
 
@@ -66,7 +66,7 @@ There are lots of different ways to run it from here. You can fire off eat.sh st
 1. Open the Shortcuts app.
 2. Make a new shortcut → add Run Shell Script.
 3. Drop in the full path to your script, e.g.:
-/Users/you/my-launch-box/eat.sh
+/Users/you/launch-box/eat.sh
 4. In the shortcut settings, turn on 'Pin in Menu Bar'.
 
 That’s it. Now you've got button in your menu bar that kicks everything off with one click 🌯.
