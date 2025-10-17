@@ -17,7 +17,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 log INFO "Layout plugin running..."
 
 # Check dependencies and skip if missing
-if ! is_cmd_installed "lua"; then
+if ! is_cmd_installed "/opt/homebrew/bin/lua"; then
     log ERROR "Skipping layout: lua not installed"
     exit_or_return 0
 fi
