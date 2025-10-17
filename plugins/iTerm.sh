@@ -20,7 +20,7 @@ fi
 
 
 # commands to run in each pane
-pane1_command='clear'
+pane1_command='clear; figlet luke is cool'
 pane2_command='clear; echo "K8s: $(kubectl config current-context):$(kubectl config view --minify --output '\''jsonpath={..namespace}'\'' || echo default)"'
 pane3_command='clear; echo "AWS: ${$(aws_prompt_info):-default}"'
 
