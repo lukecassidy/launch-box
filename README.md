@@ -6,6 +6,10 @@ Every morning, you probably open the same browser tabs, launch the same apps, co
 
 What started as a small time saver for my morning routine ended up being something I use every day. So I kept refining it.
 
+![launch-1280](https://github.com/user-attachments/assets/6d82b6ab-714e-4def-9516-4aca1c6e5460)
+
+---
+
 ## Setup
 ```bash
 git clone https://github.com/lukecassidy/launch-box.git
@@ -66,6 +70,7 @@ You can run eat.sh manually, on startup, or add a menu bar shortcut. I like this
 3. Turn on 'Pin in Menu Bar'.
 
 That's it. Now you've got a one click workspace launcher 🌯.
+
 
 ---
 
