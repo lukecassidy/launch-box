@@ -23,17 +23,17 @@ Options:
 
 Config format:
   # URLs
-  https://tinyurl.com/muywa6ax   # optional inline comment
+  https://tinyurl.com/muywa6ax
   https://www.google.com
 
   # APPS
-  Visual Studio Code   # editor
-  Slack                # chat
+  Visual Studio Code
+  Slack
   iTerm
 
   # PLUGINS
-  iTerm       # Run plugin script to configure iTerm (split panes, run commands etc)
-  layout      # Run plugin script to arrange windows/screens
+  iTerm
+  layout
 
 EOF
 }

@@ -1,82 +1,75 @@
 # l(a)unch‑box
 
-Open your daily tabs and apps on macOS with one command, powered by a small, simple config file.
+Open your daily tabs and apps on macOS with one command, powered by a simple config file.
 
-Every morning, you probably open the same browser tabs, launch the same apps, configure them and arrange windows in the same layout. This repo reads a simple config and does it all for you.
+Every morning, you probably open the same browser tabs, launch the same apps, configure them, and arrange windows the same way. This tool reads your config and does it all for you.
 
-## Install
+What started as a small time saver for my morning routine ended up being something I use every day. So I kept refining it.
+
+## Setup
 ```bash
 git clone https://github.com/lukecassidy/launch-box.git
 cd launch-box
 chmod +x eat.sh
 ```
 
-## Configuration
-The default config file is `box.config` in the project root. It has three sections: `# URLs`, `# APPS` and `# PLUGINS`. Lines starting with `#` and blank lines are ignored. Inline comments (after a space + `#`) are supported.
+---
+
+## Config
+The default config file is `box.config` in the project root and three sections: `# URLs`, `# APPS` and `# PLUGINS`.
 
 `box.config`:
 ```text
 # URLs
 https://calendar.google.com/calendar/u/0/r/week
 https://mail.google.com/mail/u/0/#inbox
-https://github.com/notifications # optional inline comment
+https://github.com/notifications
 
 # APPS
-Visual Studio Code   # editor
-Slack                # chat
-iTerm                # terminal
+Visual Studio Code # editor
+Slack              # chat
+iTerm              # terminal
 
 # PLUGINS
-iTerm       # run plugin script to configure iTerm (split panes, run commands etc)
-layout      # run plugin script to arrange windows/screens
-
+iTerm              # configure iTerm (split panes, run cmd)
+layout             # arrange windows/screens
 ```
 
 Sections:
-- **URLs**: Any valid `http`/`https` links. They will open in your default browser.
-- **APPS**: Application names should match what you see in `/Applications` (e.g., `Visual Studio Code`, `Google Chrome`, `Slack`).
-- **PLUGINS**: Each entry corresponds to a script in `plugins`. Plugins allow you to configure apps after launch (e.g., apply defaults, tweak settings) or set up your workspace (e.g., arrange window layout, position screens).
+- **URLs**: Any valid `http`/`https` links. Opened in your default browser.
+- **APPS**: Must match names in `/Applications` (e.g. `Visual Studio Code`, `Google Chrome`, `Slack`).
+- **PLUGINS**: Each entry corresponds to a script in `plugins` for post-launch setup (e.g. custom app configs or window layouts).
+
+---
 
 ## Usage
 Flags
-- `-c, --config <file>`  Use a specific config file
-- `-d, --dry-run`        Print actions without opening anything
+- `-c, --config <file>`  Use a custom config
+- `-d, --dry-run`        Print actions only
 - `-h, --help`           Show usage
 
 Examples:
 ```bash
-# Use the default config (box.config)
-./eat.sh
-
-# Use a custom config file
-./eat.sh -c work.config
-./eat.sh -c home.config
-
-# Dry run
-./eat.sh -d
+./eat.sh                # Use the default config (box.config)
+./eat.sh -c work.config # Use a custom config file
+./eat.sh -d             # Dry run
 ```
 
 ---
 
-## Run When You Need It
+## Run It Your Way
+You can run eat.sh manually, on startup, or add a menu bar shortcut. I like this approach so I'll outline it here. 
 
-There are lots of different ways to run it from here. You can fire off eat.sh straight from the terminal. You could configure the script to run on startup. Another approach is to pop a button in the macOS menu bar and run it when you need it. I like this approach so I'll outline it here. 
+### Add a Menu Bar Button (macOS Shortcuts)
+1. Open Shortcuts → New Shortcut → Run Shell Script.
+2. Add your script path, e.g. /Users/you/launch-box/eat.sh.
+3. Turn on 'Pin in Menu Bar'.
 
-### Add a Menu Bar Button (using Shortcuts)
-1. Open the Shortcuts app.
-2. Make a new shortcut → add Run Shell Script.
-3. Drop in the full path to your script, e.g.:
-/Users/you/launch-box/eat.sh
-4. In the shortcut settings, turn on 'Pin in Menu Bar'.
-
-That’s it. Now you've got button in your menu bar that kicks everything off with one click 🌯.
+That's it. Now you've got a one click workspace launcher 🌯.
 
 ---
 
 ## TODO
-- [ ] Support multiple Chrome profiles.
-- [ ] Move monitor layout to main config file.
-- [ ] Update config file type.
-
-**Note**: This project started as a small experiment after I noticed I was manually opening the same tabs and apps every day, then spending five minutes rearranging windows. I kept chipping away at it once I realised it had quietly become part of my morning routine.
-
+- [ ] Support multiple Chrome profiles
+- [ ] Move monitor layout to main config file
+- [ ] Update config file format/type
