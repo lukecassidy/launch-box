@@ -78,3 +78,4 @@ That's it. Now you've got a one click workspace launcher 🌯.
 - [ ] Support multiple Chrome profiles
 - [ ] Move monitor layout to main config file
 - [ ] Update config file format/type
+- [ ] Tidy up to be a lot more user friendly
