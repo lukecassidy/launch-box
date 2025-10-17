@@ -10,15 +10,23 @@ log INFO "Merging all Visual Studio Code 'mac' windows..."
 # Merge all Visual Studio Code windows
 osascript <<'EOF'
 tell application "System Events"
-    -- Wait briefly if VS Code hasn't finished launching yet
-    set waited to 0
-    repeat until exists (process "Code") or (waited > 10)
+    -- The process name could be either "Code" or "Electron"
+    set procName to missing value
+    repeat 10 times
+        try
+            if exists process "Code" then
+                set procName to process "Code"
+                exit repeat
+            else if exists process "Electron" then
+                set procName to process "Electron"
+                exit repeat
+            end if
+        end try
         delay 0.5
-        set waited to waited + 0.5
     end repeat
 
-    if exists (process "Code") then
-        tell process "Code"
+    if procName is not missing value then
+        tell procName
             set frontmost to true
             delay 0.3
             try
