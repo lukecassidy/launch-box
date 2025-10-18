@@ -101,8 +101,7 @@ check_core_dependencies() {
 # strip inline comments and trim whitespace from a line
 clean_line() {
     local line="$1"
-    line="${line%%[[:space:]]#*}"
-    echo "$line" | xargs
+    echo "${line%%[[:space:]]#*}" | xargs
 }
 
 # open URLs
