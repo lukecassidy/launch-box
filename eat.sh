@@ -101,7 +101,8 @@ check_core_dependencies() {
 # strip inline comments and trim whitespace from a line
 clean_line() {
     local line="$1"
-    echo "${line%%[[:space:]]#*}" | xargs
+    line="${line%%[[:space:]]#*}"
+    echo "$line" | xargs
 }
 
 # open URLs
@@ -220,6 +221,35 @@ configure_apps() {
     done < "$cfg"
 }
 
+# read layout configuration blocks
+read_layouts() {
+    local cfg="$1"
+    log INFO "Reading layout configuration..."
+
+    local layout_data=""
+    local in_layout=false
+
+    while IFS= read -r line; do
+        case "$line" in
+            \#\ LAYOUT:*)
+                in_layout=true; continue ;;
+            \#*|"")
+                continue ;;
+        esac
+
+        [[ "$in_layout" == true ]] && layout_data+="$line"$'\n'
+    done < "$cfg"
+
+    if [[ -n "$layout_data" ]]; then
+        log INFO "Layout configuration loaded."
+    else
+        log WARNING "No layout data found in config."
+    fi
+
+    LAYOUT_CONTENT="$layout_data"
+    return 0
+}
+
 main() {
     local config_file dry_run
     log INFO "Unpacking l(a)unch box."
@@ -249,6 +279,9 @@ main() {
     # configure apps
     log INFO "Nom nom nom nom nom."
     configure_apps "$config_file" "$dry_run"
+
+    # read layout configuration
+    read_layouts "$config_file"
 
     log INFO "Nom nom nom nom nom nom."
     log INFO "Finished."
