@@ -1,3 +1,8 @@
+#!/bin/bash
+
+# Ensure HOME is set (fallback for Shortcuts / non-login shells)
+HOME="${HOME:-$(eval echo ~$(whoami))}"
+
 # logging
 log() {
     local level="$1"; shift
