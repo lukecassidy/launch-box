@@ -15,7 +15,6 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
 log INFO "Layout plugin running..."
-log INFO "Using HOME=$HOME"
 
 # Check dependencies and skip if missing
 if ! is_cmd_installed "/opt/homebrew/bin/lua"; then
