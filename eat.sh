@@ -131,7 +131,7 @@ open_urls() {
             if (( dry )); then
                 : # null command (dry run)
             else
-                open "$cleaned"
+                run_in_gui_session open "$cleaned"
             fi
         else
             log WARNING "Invalid URL - '$cleaned'"
@@ -174,7 +174,7 @@ open_apps() {
                 if (( dry )); then
                     : # no-op (dry run)
                 else
-                    open -a "$cleaned"
+                    run_in_gui_session open -a "$cleaned"
                 fi
             else
                 log WARNING "Application not found - '$cleaned'"

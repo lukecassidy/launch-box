@@ -8,7 +8,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 log INFO "Merging all Visual Studio Code 'mac' windows..."
 
 # Merge all Visual Studio Code windows
-osascript <<'EOF'
+run_in_gui_session osascript <<'EOF'
 tell application "System Events"
     -- The process name could be either "Code" or "Electron"
     set procName to missing value

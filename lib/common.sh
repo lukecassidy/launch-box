@@ -3,6 +3,15 @@
 # Ensure HOME is set (fallback for Shortcuts / non-login shells)
 HOME="${HOME:-$(eval echo ~$(whoami))}"
 
+# Store GUI session UID for reuse.
+__gui_uid="$(stat -f '%u' /dev/console 2>/dev/null || id -u)"
+
+run_in_gui_session() {
+    local gui_uid="$__gui_uid"
+    [[ "$(id -u)" -eq "$gui_uid" ]] && { "$@"; return $?; }
+    /bin/launchctl asuser "$gui_uid" "$@" || "$@"
+}
+
 # logging
 log() {
     local level="$1"; shift
@@ -35,7 +44,7 @@ exit_or_return() {
 
 # is app installed
 is_app_installed() {
-    if ! open -Ra "$1" >/dev/null 2>&1; then
+    if ! run_in_gui_session open -Ra "$1" >/dev/null 2>&1; then
         return 1
     else
         return 0
@@ -52,7 +61,7 @@ is_app_running() {
     local result
 
     # Use osascript to check for a running process
-    if ! result=$(osascript <<EOF 2>/dev/null
+    if ! result=$(run_in_gui_session osascript <<EOF 2>/dev/null
 tell application "System Events"
     return (exists process "${escaped_app}")
 end tell
@@ -76,7 +85,7 @@ is_url_open_in_chrome() {
     local escaped_url="${url//\"/\\\"}"
     local result
 
-    if ! result=$(osascript <<EOF 2>/dev/null
+    if ! result=$(run_in_gui_session osascript <<EOF 2>/dev/null
 if application "Google Chrome" is running then
     tell application "Google Chrome"
         repeat with w in windows
