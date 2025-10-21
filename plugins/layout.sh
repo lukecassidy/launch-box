@@ -16,6 +16,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
 log INFO "Layout plugin running..."
 
+# Hammerspoon CLI location
+HS_CLI="/opt/homebrew/bin/hs"
+
 # Check dependencies and skip if missing
 if ! is_cmd_installed "/opt/homebrew/bin/lua"; then
     log ERROR "Skipping layout: lua not installed"
@@ -41,22 +44,32 @@ fi
 # Ensure Hammerspoon is running
 if ! pgrep -x "Hammerspoon" >/dev/null; then
     log INFO "Starting Hammerspoon..."
-    open -a Hammerspoon
+    run_in_gui_session open -a Hammerspoon
     sleep 2
 fi
 
 # Wait for Hammerspoon IPC to become available
 log INFO "Waiting for Hammerspoon IPC to become available..."
-if ! /opt/homebrew/bin/hs -c "return 'ok'" >/dev/null 2>&1; then
-    log ERROR "Hammerspoon IPC not available."
-    exit_or_return 1
-fi
+ipc_status=0
+ipc_output=""
+for attempt in {1..5}; do
+    if ipc_output="$(run_in_gui_session "$HS_CLI" -c "return 'ok'" 2>&1)"; then
+        log INFO "Hammerspoon IPC ready (attempt $attempt)."
+        break
+    fi
+    ipc_status=$?
+    if (( attempt == 5 )); then
+        log ERROR "Hammerspoon IPC not available after ${attempt} attempts."
+        exit_or_return 1
+    fi
+    log WARN "Hammerspoon IPC not ready (attempt $attempt/5). Retrying..."
+    sleep 1
+done
 
 # Apply layout
 log INFO "Applying window layout via Hammerspoon..."
-if /opt/homebrew/bin/hs -c "applyWorkspace()"; then
-    log INFO "Requested Hammerspoon to apply workspace layout."
-else
+if ! apply_output="$(run_in_gui_session "$HS_CLI" -c "applyWorkspace()" 2>&1)"; then
+    apply_status=$?
     log ERROR "Failed to apply Hammerspoon workspace layout."
     exit_or_return 1
 fi
