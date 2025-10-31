@@ -44,7 +44,7 @@ fi
 # Ensure Hammerspoon is running
 if ! pgrep -x "Hammerspoon" >/dev/null; then
     log INFO "Starting Hammerspoon..."
-    run_in_gui_session open -a Hammerspoon
+    gui_open -a Hammerspoon
     sleep 2
 fi
 
@@ -53,7 +53,7 @@ log INFO "Waiting for Hammerspoon IPC to become available..."
 ipc_status=0
 ipc_output=""
 for attempt in {1..5}; do
-    if ipc_output="$(run_in_gui_session "$HS_CLI" -c "return 'ok'" 2>&1)"; then
+    if ipc_output="$(gui_run "$HS_CLI" -c "return 'ok'" 2>&1)"; then
         log INFO "Hammerspoon IPC ready (attempt $attempt)."
         break
     fi
@@ -68,7 +68,7 @@ done
 
 # Apply layout
 log INFO "Applying window layout via Hammerspoon..."
-if ! apply_output="$(run_in_gui_session "$HS_CLI" -c "applyWorkspace()" 2>&1)"; then
+if ! apply_output="$(gui_run "$HS_CLI" -c "applyWorkspace()" 2>&1)"; then
     apply_status=$?
     log ERROR "Failed to apply Hammerspoon workspace layout."
     exit_or_return 1

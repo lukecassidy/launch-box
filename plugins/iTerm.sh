@@ -29,7 +29,7 @@ export PANE2_COMMAND="$pane2_command"
 export PANE3_COMMAND="$pane3_command"
 
 # Create a three-pane workspace (top plus two lower panes) and run starter commands
-if ! run_in_gui_session osascript <<'EOF'; then
+if ! gui_run_applescript <<'EOF'; then
     set pane1Command to system attribute "PANE1_COMMAND"
     set pane2Command to system attribute "PANE2_COMMAND"
     set pane3Command to system attribute "PANE3_COMMAND"

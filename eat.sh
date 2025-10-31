@@ -116,6 +116,7 @@ open_urls() {
         # ignore full comments and empty lines
         [[ -z "$url" || "$url" =~ ^[[:space:]]*#.*$ ]] && continue
 
+        # strip inline comments and whitespace
         local cleaned
         cleaned=$(clean_line "$url")
         [[ -z "$cleaned" ]] && continue
@@ -131,7 +132,7 @@ open_urls() {
             if (( dry )); then
                 : # null command (dry run)
             else
-                run_in_gui_session open "$cleaned"
+                gui_open "$cleaned"
             fi
         else
             log WARNING "Invalid URL - '$cleaned'"
@@ -174,7 +175,7 @@ open_apps() {
                 if (( dry )); then
                     : # no-op (dry run)
                 else
-                    run_in_gui_session open -a "$cleaned"
+                    gui_open -a "$cleaned"
                 fi
             else
                 log WARNING "Application not found - '$cleaned'"
