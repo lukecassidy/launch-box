@@ -6,12 +6,15 @@
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 log INFO "Merging all Visual Studio Code 'mac' windows..."
-
 code_cmd="click menu item \"Merge All Windows\" of menu \"Window\" of menu bar 1"
+
 
 for proc_name in "Code" "Electron"; do
     wait_for_process "$proc_name" 5 1 && break
-done
+done || {
+    log ERROR "Visual Studio Code process not found."
+    exit_or_return 1
+}
 
 # Merge all windows via menu
 gui_run_applescript <<EOF
