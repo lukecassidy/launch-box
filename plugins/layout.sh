@@ -42,29 +42,26 @@ else
 fi
 
 # Ensure Hammerspoon is running
-if ! pgrep -x "Hammerspoon" >/dev/null; then
+if ! is_app_running "Hammerspoon"; then
     log INFO "Starting Hammerspoon..."
     gui_open -a Hammerspoon
-    sleep 2
+fi
+
+if ! wait_for_process "Hammerspoon" 10 1; then
+    log ERROR "Hammerspoon failed to launch."
+    exit_or_return 1
 fi
 
 # Wait for Hammerspoon IPC to become available
-log INFO "Waiting for Hammerspoon IPC to become available..."
-ipc_status=0
-ipc_output=""
-for attempt in {1..5}; do
-    if ipc_output="$(gui_run "$HS_CLI" -c "return 'ok'" 2>&1)"; then
-        log INFO "Hammerspoon IPC ready (attempt $attempt)."
-        break
-    fi
-    ipc_status=$?
-    if (( attempt == 5 )); then
-        log ERROR "Hammerspoon IPC not available after ${attempt} attempts."
-        exit_or_return 1
-    fi
-    log WARN "Hammerspoon IPC not ready (attempt $attempt/5). Retrying..."
-    sleep 1
-done
+log INFO "Waiting for Hammerspoon IPC..."
+if wait_for_success 5 2 gui_run "$HS_CLI" -c "return 'ok'"; then
+    log INFO "Hammerspoon IPC ready."
+else
+    ipc_output="$(gui_run "$HS_CLI" -c "return 'ok'" 2>&1)"
+    log ERROR "Hammerspoon IPC not available after waiting."
+    [[ -n "$ipc_output" ]] && log ERROR "Last IPC error: $ipc_output"
+    exit_or_return 1
+fi
 
 # Apply layout
 log INFO "Applying window layout via Hammerspoon..."
