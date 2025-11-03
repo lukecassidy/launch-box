@@ -1,41 +1,26 @@
 #!/bin/bash
 
 ###############################################################################
-# Merge all Visual Studio Code 'mac' windows into a single window
+# Merge all Visual Studio Code windows into a single window
 ###############################################################################
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 log INFO "Merging all Visual Studio Code 'mac' windows..."
 
-# Merge all Visual Studio Code windows
-gui_run_applescript <<'EOF'
-tell application "System Events"
-    -- The process name could be either "Code" or "Electron"
-    set procName to missing value
-    repeat 10 times
-        try
-            if exists process "Code" then
-                set procName to process "Code"
-                exit repeat
-            else if exists process "Electron" then
-                set procName to process "Electron"
-                exit repeat
-            end if
-        end try
-        delay 0.5
-    end repeat
+code_cmd="click menu item \"Merge All Windows\" of menu \"Window\" of menu bar 1"
 
-    if procName is not missing value then
-        tell procName
-            set frontmost to true
-            delay 0.3
-            try
-                click menu item "Merge All Windows" of menu "Window" of menu bar 1
-            on error
-                display notification "Couldn't merge windows." with title "Visual Studio Code"
-            end try
-        end tell
-    end if
+for proc_name in "Code" "Electron"; do
+    wait_for_process "$proc_name" 5 1 && break
+done
+
+# Merge all windows via menu
+gui_run_applescript <<EOF
+tell application "System Events"
+    tell process "$proc_name"
+        set frontmost to true
+        delay 0.3
+        $code_cmd
+    end tell
 end tell
 EOF
 
