@@ -12,25 +12,31 @@
 #           System Preferences > Security & Privacy > Privacy > Accessibility
 ###############################################################################
 
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+plugin_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$plugin_dir/../lib/common.sh"
 
 log INFO "Layout plugin running..."
 
 # Hammerspoon CLI location
-HS_CLI="/opt/homebrew/bin/hs"
+HS_CLI="${HS_CLI:-/opt/homebrew/bin/hs}"
+LUA_BIN="${LUA_BIN:-/opt/homebrew/bin/lua}"
 
 # Check dependencies and skip if missing
-if ! is_cmd_installed "/opt/homebrew/bin/lua"; then
+if ! is_cmd_installed $HS_CLI; then
+    log ERROR "Skipping layout: hs CLI not found at $HS_CLI"
+    exit_or_return 0
+fi
+if ! is_cmd_installed $LUA_BIN; then
     log ERROR "Skipping layout: lua not installed"
     exit_or_return 0
 fi
-if ! is_app_installed "Hammerspoon"; then
+if ! is_app_installed Hammerspoon; then
     log ERROR "Skipping layout: Hammerspoon not installed"
     exit_or_return 0
 fi
 
 # Ensure Hammerspoon config symlink exists
-repo_cfg="$(dirname "${BASH_SOURCE[0]}")/hammerspoon.lua"
+repo_cfg="$plugin_dir/hammerspoon.lua"
 target_cfg="$HOME/.hammerspoon/init.lua"
 
 if [[ "$(readlink "$target_cfg")" != "$(realpath "$repo_cfg")" ]]; then
@@ -53,8 +59,12 @@ if ! wait_for_process "Hammerspoon" 10 1; then
 fi
 
 # Wait for Hammerspoon IPC to become available
+is_hs_ipc_ready() {
+    gui_run "$HS_CLI" -c "return 'ok'" >/dev/null 2>&1
+}
+
 log INFO "Waiting for Hammerspoon IPC..."
-if wait_for_success 5 2 gui_run "$HS_CLI" -c "return 'ok'"; then
+if wait_for_success 5 1 is_hs_ipc_ready; then
     log INFO "Hammerspoon IPC ready."
 else
     ipc_output="$(gui_run "$HS_CLI" -c "return 'ok'" 2>&1)"
@@ -66,7 +76,7 @@ fi
 # Apply layout
 log INFO "Applying window layout via Hammerspoon..."
 if ! apply_output="$(gui_run "$HS_CLI" -c "applyWorkspace()" 2>&1)"; then
-    apply_status=$?
     log ERROR "Failed to apply Hammerspoon workspace layout."
+    [[ -n "$apply_output" ]] && log ERROR "Hammerspoon output: $apply_output"
     exit_or_return 1
 fi
