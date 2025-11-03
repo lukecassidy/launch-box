@@ -123,3 +123,25 @@ is_cmd_installed() {
         return 0
     fi
 }
+
+# retry command until success or attempts exhausted
+wait_for_success() {
+    local attempts="$1" delay="$2"
+    shift 2
+    local attempt
+
+    for ((attempt=1; attempt<=attempts; attempt++)); do
+        if "$@"; then
+            return 0
+        fi
+        (( attempt < attempts )) && sleep "$delay"
+    done
+
+    return 1
+}
+
+# wait for a GUI app process to appear
+wait_for_process() {
+    local app="$1" attempts="${2:-20}" delay="${3:-1}"
+    wait_for_success "$attempts" "$delay" is_app_running "$app"
+}
