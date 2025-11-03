@@ -43,7 +43,15 @@ gui_run_applescript() (
 
 # Open a file, URL or app in the logged in GUI session via `open`.
 gui_open() {
-    local open_args=()
-    [[ $1 == --app || $1 == -a ]] && { open_args=(-a "$2"); shift 2; }
-    gui_run open "${open_args[@]}" "$@"
+    if [[ $# -eq 0 ]]; then
+        log ERROR "gui_open requires at least one argument."
+        return 1
+    fi
+
+    if [[ "$1" == -a ]] && [[ $# -lt 2 ]]; then
+        log ERROR "gui_open $1 requires an app name."
+        return 1
+    fi
+
+    gui_run open "$@"
 }
