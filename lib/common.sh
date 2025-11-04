@@ -140,7 +140,7 @@ wait_for_success() {
     return 1
 }
 
-# wait for a GUI app process to appear
+# wait for an app process to appear
 wait_for_process() {
     local app="$1" attempts="${2:-20}" delay="${3:-1}"
     wait_for_success "$attempts" "$delay" is_app_running "$app"
