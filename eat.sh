@@ -10,6 +10,10 @@ set -Eeuo pipefail
 # Usage: ./eat.sh --help
 ###############################################################################
 
+# Redirect all output to log file, while still printing to console
+LOG_FILE="$(dirname "${BASH_SOURCE[0]}")/launch-box.log"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 usage() {
