@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Ensure HOME is set (fallback for Shortcuts / non-login shells)
+# Ensure HOME is set (fallback for non-login shells)
 HOME="${HOME:-$(eval echo ~$(whoami))}"
 
 source "$(dirname "${BASH_SOURCE[0]}")/gui.sh"

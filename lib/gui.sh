@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ###############################################################################
-# A small wrapper lib for launching GUI aware commands from Shortcuts or other
-# non-interactive contexts.
+# A small wrapper lib for launching GUI aware commands from non-interactive
+# contexts (automator, shortcuts, launchd, etc).
 #
-# Shortcuts starts processes under launchd where:
+# Non-interactive contexts start processes under launchd where:
 #   - stdout/stderr/stdin/PATH can differ from a login shell.
 #   - the GUI session may not be attached.
 #

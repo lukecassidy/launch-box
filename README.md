@@ -62,15 +62,28 @@ Examples:
 ---
 
 ## Run It Your Way
-You can run eat.sh manually, on startup, or add a menu bar shortcut. I like this approach so I'll outline it here. 
+You can run eat.sh manually, on startup, or add a menu bar shortcut. I like this last approach so I'll outline it here. 
 
-### Add a Menu Bar Button (macOS Shortcuts)
-1. Open Shortcuts → New Shortcut → Run Shell Script.
-2. Add your script path, e.g. /Users/you/launch-box/eat.sh.
-3. Turn on 'Pin in Menu Bar'.
+### Make it Clickable
+1. Open Applications ▸ Automator → New Document → Application
+2. “Run Shell Script”.
+3. Add `"/Path/to/repo/launch-box/eat.sh" "$@"`
+4. Save as `LaunchBox`
+
+## Add To Menu Bar
+5. Open Shortcuts → New Shortcut → Open App.
+6. Select `LaunchBox`
+7. Click "i" icon & Turn on 'Pin in Menu Bar'.
 
 That's it. Now you've got a one click workspace launcher 🌯.
 
+---
+
+## Troubleshooting
+If you encounter permission issues, grant **Accessibility** permissions to the app that runs `eat.sh`. Depending on your setup, this could be iTerm2, Shortcuts, Automator etc. You can do this via:
+- System Settings → Privacy & Security → Accessibility
+
+After granting access, try running the script again.
 
 ---
 
