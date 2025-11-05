@@ -38,7 +38,32 @@ gui_run_applescript() (
     trap 'rm -f "$tmp_file"' RETURN
 
     cat >"$tmp_file" || return 1
-    gui_run osascript "$tmp_file"
+
+    local output status
+    output=$(gui_run osascript "$tmp_file" 2>&1)
+    status=$?
+
+    if (( status != 0 )); then
+        if [[ "$output" == *"osascript is not allowed assistive access"* ]]; then
+            local msg1="AppleScript failed: macOS denied Accessibility permissions to 'osascript'."
+            local msg2="Grant Accessibility access to the calling application (System Settings → Privacy & Security → Accessibility) and retry."
+
+            if declare -F log >/dev/null; then
+                log ERROR "$msg1"
+                log ERROR "$msg2"
+            else
+                printf 'ERROR: %s\n' "$msg1" >&2
+                printf 'ERROR: %s\n' "$msg2" >&2
+            fi
+        fi
+
+        printf '%s\n' "$output" >&2
+        return "$status"
+    fi
+
+    if [[ -n "$output" ]]; then
+        printf '%s\n' "$output"
+    fi
 )
 
 # Open a file, URL or app in the logged in GUI session via `open`.

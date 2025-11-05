@@ -17,7 +17,7 @@ done || {
 }
 
 # Merge all windows via menu
-gui_run_applescript <<EOF
+if ! gui_run_applescript <<EOF
 tell application "System Events"
     tell process "$proc_name"
         set frontmost to true
@@ -26,5 +26,9 @@ tell application "System Events"
     end tell
 end tell
 EOF
+then
+    log ERROR "Failed to request VS Code to merge all windows."
+    exit_or_return 1
+fi
 
 log INFO "Requested VS Code to merge all windows."
