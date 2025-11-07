@@ -88,17 +88,21 @@ is_valid_url() {
 
 # check if core dependencies are installed
 check_core_dependencies() {
-    local missing=0
-    dependencies=(open xargs)
-    for dep in "${dependencies[@]}"; do
-        is_cmd_installed "$dep" || missing=1
-        deps+=("$dep")
+    local -a deps=(open xargs)
+    local -a missing=()
+
+    for dep in "${deps[@]}"; do
+        if ! is_cmd_installed "$dep"; then
+            missing+=("$dep")
+        fi
     done
 
-    if (( missing )); then
-        log ERROR "Missing core dependencies: ${deps[*]}"
+    if ((${#missing[@]})); then
+        log ERROR "Missing core dependencies: ${missing[*]}"
         return 1
     fi
+
+    log INFO "All core dependencies are installed."
     return 0
 }
 
