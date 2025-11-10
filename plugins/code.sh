@@ -17,7 +17,7 @@ done || {
 }
 
 # Merge all windows via menu
-if ! gui_run_applescript <<EOF
+if ! osascript <<EOF
 tell application "System Events"
     tell process "$proc_name"
         set frontmost to true

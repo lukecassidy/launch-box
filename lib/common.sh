@@ -3,8 +3,6 @@
 # Ensure HOME is set (fallback for non-login shells)
 HOME="${HOME:-$(eval echo ~$(whoami))}"
 
-source "$(dirname "${BASH_SOURCE[0]}")/gui.sh"
-
 # logging
 log() {
     local level="$1"; shift
@@ -37,7 +35,7 @@ exit_or_return() {
 
 # is app installed
 is_app_installed() {
-    if ! gui_run open -Ra "$1" >/dev/null 2>&1; then
+    if ! open -Ra "$1" >/dev/null 2>&1; then
         return 1
     else
         return 0
@@ -54,7 +52,7 @@ is_app_running() {
     local result
 
     if ! result=$(
-        gui_run_applescript 2>/dev/null <<EOF
+        osascript 2>/dev/null <<EOF
 tell application "System Events"
     return (exists process "${escaped_app}")
 end tell
@@ -79,7 +77,7 @@ is_url_open_in_chrome() {
     local result
 
     if ! result=$(
-        gui_run_applescript 2>/dev/null <<EOF
+        osascript 2>/dev/null <<EOF
 if application "Google Chrome" is running then
     tell application "Google Chrome"
         repeat with w in windows
