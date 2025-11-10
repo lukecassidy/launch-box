@@ -3,11 +3,10 @@ set -Eeuo pipefail
 
 ###############################################################################
 # Description:
-#     This script reads a config file that contains URLs and local mac app
-#     names. It opens the URLs in the default browser and launches the apps
-#     listed in the file. See README.md for more information.
+#     This script reads a YAML config file (box.yaml) that contains URLs,
+#     app names, and plugins. It opens URLs, launches apps, and runs plugins.
 #
-# Usage: ./eat.sh --help
+# Usage: ./eat.sh [options]
 ###############################################################################
 
 # Redirect all output to log file, while still printing to console
@@ -27,23 +26,23 @@ usage() {
 Usage: $(basename "$0") [options]
 
 Options:
-  -c, --config <file>   Path to config file (default: box.config)
+  -c, --config <file>   Path to config file (default: box.yaml)
   -d, --dry-run         Print actions without opening anything
   -h, --help            Show this help and exit
 
-Config format:
-  # URLs
-  https://tinyurl.com/muywa6ax
-  https://www.google.com
+Config format (YAML):
+  urls:
+    - https://calendar.google.com
+    - https://mail.google.com
 
-  # APPS
-  Visual Studio Code
-  Slack
-  iTerm
+  apps:
+    - Visual Studio Code
+    - Slack
+    - iTerm
 
-  # PLUGINS
-  iTerm
-  layout
+  plugins:
+    - iTerm
+    - layout
 
 EOF
 }
@@ -51,7 +50,7 @@ EOF
 # parse command line arguments
 parse_args() {
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local cfg="$script_dir/box.config"
+    local cfg="$script_dir/box.yaml"
     local dry=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -60,8 +59,6 @@ parse_args() {
                 cfg="$2"; shift 2 ;;
             -d|--dry-run)
                 dry=1; shift ;;
-            -h|--help)
-                usage; exit 0 ;;
             *)
                 log ERROR "Unknown option: $1"; usage; exit 2 ;;
         esac
@@ -94,7 +91,7 @@ is_valid_url() {
 
 # check if core dependencies are installed
 check_core_dependencies() {
-    local -a deps=(open xargs)
+    local -a deps=(open yq)
     local -a missing=()
 
     for dep in "${deps[@]}"; do
@@ -112,191 +109,139 @@ check_core_dependencies() {
     return 0
 }
 
-# strip inline comments and trim whitespace from a line
-clean_line() {
-    local line="$1"
-    line="${line%%[[:space:]]#*}"
-    echo "$line" | xargs
-}
-
 # open URLs
 open_urls() {
     local cfg="$1" dry="$2"
     log INFO "Opening URLs..."
+    local urls
+    urls=$(yq eval '.urls[]' "$cfg" 2>/dev/null)
+
+    if [[ -z "$urls" ]]; then
+        log INFO "No URLs configured."
+        return 0
+    fi
+
     while IFS= read -r url; do
-        # stop reading URLs at apps section
-        [[ "$url" == "# APPS" ]] && break
-
-        # ignore full comments and empty lines
-        [[ -z "$url" || "$url" =~ ^[[:space:]]*#.*$ ]] && continue
-
-        # strip inline comments and whitespace
-        local cleaned
-        cleaned=$(clean_line "$url")
-        [[ -z "$cleaned" ]] && continue
+        [[ -z "$url" ]] && continue
 
         # validate and open URL
-        if is_valid_url "$cleaned"; then
-            if is_url_open "$cleaned"; then
-                log INFO "URL already open: '$cleaned'"
+        if is_valid_url "$url"; then
+            if is_url_open "$url"; then
+                log INFO "URL already open: '$url'"
                 continue
             fi
 
-            log INFO "Opening URL: '$cleaned'"
+            log INFO "Opening URL: '$url'"
             if (( dry )); then
                 : # null command (dry run)
             else
-                open "$cleaned"
+                open "$url"
             fi
         else
-            log WARNING "Invalid URL - '$cleaned'"
+            log WARNING "Invalid URL - '$url'"
         fi
-    done < "$cfg"
+    done <<< "$urls"
 }
 
 # launch apps
 open_apps() {
     local cfg="$1" dry="$2"
     log INFO "Opening Applications..."
-    local apps_section=false
-    while IFS= read -r line; do
-        # start reading apps at apps section (check raw line)
-        if [[ "$line" == "# APPS" ]]; then
-            apps_section=true
-            continue
-        fi
+    local apps
+    apps=$(yq eval '.apps[]' "$cfg" 2>/dev/null)
 
-        # stop reading APPS at plugins section
-        [[ "$line" == "# PLUGINS" ]] && break
+    if [[ -z "$apps" ]]; then
+        log INFO "No apps configured."
+        return 0
+    fi
 
-        # ignore full comments and empty lines
-        [[ -z "$line" || "$line" =~ ^[[:space:]]*#.*$ ]] && continue
+    while IFS= read -r app; do
+        [[ -z "$app" ]] && continue
 
-        if [[ "$apps_section" == true ]]; then
-
-            # strip inline comments and whitespace
-            local cleaned
-            cleaned=$(clean_line "$line")
-            [[ -z "$cleaned" ]] && continue
-
-            if is_app_installed "$cleaned"; then
-                if is_app_running "$cleaned"; then
-                    log INFO "Application already running: '$cleaned'"
-                    continue
-                fi
-
-                log INFO "Opening application: '$cleaned'"
-                if (( dry )); then
-                    : # no-op (dry run)
-                else
-                    open -a "$cleaned"
-                fi
-            else
-                log WARNING "Application not found - '$cleaned'"
+        if is_app_installed "$app"; then
+            if is_app_running "$app"; then
+                log INFO "Application already running: '$app'"
+                continue
             fi
+
+            log INFO "Opening application: '$app'"
+            if (( dry )); then
+                : # no-op (dry run)
+            else
+                open -a "$app"
+            fi
+        else
+            log WARNING "Application not found - '$app'"
         fi
-    done < "$cfg"
+    done <<< "$apps"
 }
 
 # configure apps via plugins
 configure_apps() {
     local cfg="$1" dry="$2"
     log INFO "Configuring Applications..."
-    local plugins_section=false
-    while IFS= read -r line; do
-        # start reading plugins at plugins section (check raw line)
-        if [[ "$line" == "# PLUGINS" ]]; then
-            plugins_section=true
-            continue
-        fi
+    local plugins
+    plugins=$(yq eval '.plugins[]' "$cfg" 2>/dev/null)
 
-        # ignore full comments and empty lines
-        [[ -z "$line" || "$line" =~ ^[[:space:]]*#.*$ ]] && continue
-
-        if [[ "$plugins_section" == true ]]; then
-
-            # strip inline comments and whitespace
-            local cleaned
-            cleaned=$(clean_line "$line")
-            [[ -z "$cleaned" ]] && continue
-
-            # check if plugin script exists
-            local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-            if [[ -f "$script_dir/plugins/$cleaned.sh" ]]; then
-                log INFO "Running plugin script: '$cleaned'"
-                if (( dry )); then
-                    : # no-op (dry run)
-                else
-                    source "$script_dir/plugins/$cleaned.sh"
-                fi
-            else
-                log WARNING "Plugin script not found - '$cleaned'"
-            fi
-        fi
-    done < "$cfg"
-}
-
-# read layout configuration blocks
-read_layouts() {
-    local cfg="$1"
-    log INFO "Reading layout configuration..."
-
-    local layout_data=""
-    local in_layout=false
-
-    while IFS= read -r line; do
-        case "$line" in
-            \#\ LAYOUT:*)
-                in_layout=true; continue ;;
-            \#*|"")
-                continue ;;
-        esac
-
-        [[ "$in_layout" == true ]] && layout_data+="$line"$'\n'
-    done < "$cfg"
-
-    if [[ -n "$layout_data" ]]; then
-        log INFO "Layout configuration loaded."
-    else
-        log WARNING "No layout data found in config."
+    if [[ -z "$plugins" ]]; then
+        log INFO "No plugins configured."
+        return 0
     fi
 
-    LAYOUT_CONTENT="$layout_data"
-    return 0
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    while IFS= read -r plugin; do
+        [[ -z "$plugin" ]] && continue
+
+        if [[ -f "$script_dir/plugins/$plugin.sh" ]]; then
+            log INFO "Running plugin script: '$plugin'"
+            if (( dry )); then
+                : # no-op (dry run)
+            else
+                source "$script_dir/plugins/$plugin.sh"
+            fi
+        else
+            log WARNING "Plugin script not found - '$plugin'"
+        fi
+    done <<< "$plugins"
 }
 
+# main
 main() {
-    local config_file dry_run
+    local cfg dry_run
+
+    # handle help before anything else
+    for arg in "$@"; do
+        if [[ "$arg" == "-h" || "$arg" == "--help" ]]; then
+            usage
+            exit 0
+        fi
+    done
+
     log INFO "Unpacking l(a)unch box."
 
     # parse command line arguments
-    read -r config_file dry_run < <(parse_args "$@")
+    local parsed
+    parsed=$(parse_args "$@")
+    read -r cfg dry_run <<< "$parsed"
 
     log INFO "Checking core dependencies..."
-    if ! check_core_dependencies; then
-        exit 1
-    fi
+    check_core_dependencies || exit 1
 
-    log INFO "Checking config file: '$config_file'..."
-    if ! check_config_file "$config_file"; then
-        exit 1
-    fi
+    log INFO "Checking config file: '$cfg'..."
+    check_config_file "$cfg" || exit 1
 
     # open URLs
     log INFO "Nom nom nom."
-    open_urls "$config_file" "$dry_run"
+    open_urls "$cfg" "$dry_run"
 
     # open apps
     log INFO "Nom nom nom nom."
-    open_apps "$config_file" "$dry_run"
+    open_apps "$cfg" "$dry_run"
     sleep 2 # wait for apps to launch
 
     # configure apps
     log INFO "Nom nom nom nom nom."
-    configure_apps "$config_file" "$dry_run"
-
-    # read layout configuration
-    read_layouts "$config_file"
+    configure_apps "$cfg" "$dry_run"
 
     log INFO "Nom nom nom nom nom nom."
     log INFO "Finished."
