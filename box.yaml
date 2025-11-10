@@ -1,4 +1,3 @@
-# yaml version of config - WIP
 urls:
   - https://calendar.google.com/calendar/u/0/r/week
   - https://mail.google.com/mail/u/0/#inbox
@@ -10,6 +9,7 @@ apps:
   - iTerm
 
 plugins:
+  - code
   - iTerm
   - layout
 
