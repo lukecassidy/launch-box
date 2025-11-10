@@ -1,9 +1,9 @@
 # macOS metadata
 .DS_Store
 
-# # Logs and runtime output
-# *.log
-# launch-box.log
+# Logs and runtime output
+*.log
+launch-box.log
 
 # Editor swap/backup files
 *~
