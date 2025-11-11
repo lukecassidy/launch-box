@@ -1,6 +1,10 @@
 #!/bin/bash
 
-# Ensure HOME is set (fallback for non-login shells)
+# Prevent repeated sourcing
+[[ -n "$__COMMON_SH_LOADED" ]] && return
+__COMMON_SH_LOADED=1
+
+# Fallback for non-login shells
 HOME="${HOME:-$(eval echo ~$(whoami))}"
 PATH="$PATH:/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin"
 
