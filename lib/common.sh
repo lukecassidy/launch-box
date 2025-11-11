@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Prevent repeated sourcing
-[[ -n "$__COMMON_SH_LOADED" ]] && return
+[[ -n "${__COMMON_SH_LOADED:-}" ]] && return
 __COMMON_SH_LOADED=1
 
 # Fallback for non-login shells

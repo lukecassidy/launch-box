@@ -17,9 +17,9 @@ layouts:
   single:
     Built-in Retina Display:
       - { slot: lft_half_all, app: code }
-      - { slot: rgt_thrd_top, app: Google Chrome }
       - { slot: rgt_thrd_mid, app: Slack }
       - { slot: rgt_thrd_bot, app: iTerm }
+      - { slot: rgt_thrd_top, app: Google Chrome }
 
   dual:
     Built-in Retina Display:
