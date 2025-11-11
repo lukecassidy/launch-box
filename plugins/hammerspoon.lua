@@ -10,7 +10,7 @@ local layouts = {
 
     -- Single-monitor (laptop only)
     single = {
-        ["Built-in Retina Display"] = {
+        [1] = {  -- Primary screen (built-in display)
             { slot = "lft_half_all", app = "code" },
             { slot = "rgt_thrd_top", app = "Slack" },
             { slot = "rgt_thrd_mid", app = "iTerm" },
@@ -20,12 +20,12 @@ local layouts = {
 
     -- Dual-monitor (laptop + one external)
     dual = {
-        ["Built-in Retina Display"] = {
+        [1] = {  -- Primary screen (built-in display)
             { slot = "lft_half_all", app = "Slack" },
             { slot = "rgt_qrtr_top", app = "Spotify" },
             { slot = "rgt_qrtr_bot", app = "iTerm" },
         },
-        ["LS27D60xU"] = {
+        [2] = {  -- First external monitor
             { slot = "lft_half_all", app = "code" },
             { slot = "rgt_half_all", app = "Google Chrome" },
         },
@@ -33,15 +33,15 @@ local layouts = {
 
     -- Triple-monitor (laptop + two externals)
     triple = {
-        ["Built-in Retina Display"] = {
+        [1] = {  -- Primary screen (built-in display)
             { slot = "lft_half_all", app = "Slack" },
             { slot = "rgt_half_all", app = "Spotify" },
         },
-        ["LS27D60xU (1)"] = {
+        [2] = {  -- First external monitor
             { slot = "lft_half_all", app = "code" },
             { slot = "rgt_half_all", app = "Google Chrome" },
         },
-        ["LS27D60xU (2)"] = {
+        [3] = {  -- Second external monitor
             { slot = "lft_half_all", app = "iTerm" },
             { slot = "rgt_qrtr_top", app = "ChatGPT" },
             { slot = "rgt_qrtr_bot", app = "Notion" },
@@ -122,17 +122,26 @@ end
 
 -- Apply the configured workspace.
 function applyWorkspace(screenMode)
-    local screens = getScreens()
-    local screenCount = #hs.screen.allScreens()
+    local allScreens = hs.screen.allScreens()
+    local screenCount = #allScreens
+
+    -- Ensure primary screen is always first
+    local orderedScreens = { hs.screen.primaryScreen() }
+    for _, screen in ipairs(allScreens) do
+        if screen ~= orderedScreens[1] then
+            table.insert(orderedScreens, screen)
+        end
+    end
 
     -- Auto-detect layout mode based on number of screens if not provided
     screenMode = screenMode or ({ [2]="dual", [3]="triple" })[screenCount] or "single"
 
-    for screenName, layout in pairs(layouts[screenMode]) do
-        local screen = screens[screenName]
-        placeWindows(screen, layout)
+    for screenIndex, layout in pairs(layouts[screenMode]) do
+        if orderedScreens[screenIndex] then
+            placeWindows(orderedScreens[screenIndex], layout)
+        end
     end
-    hs.alert.show("Layout applied")
+    hs.alert.show("Layout applied: " .. screenMode .. " (" .. screenCount .. " screens)")
 end
 
 -- Trigger via hotkey (cmd+alt+ctrl+L) or from shell script
