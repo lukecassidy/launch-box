@@ -1,0 +1,53 @@
+{
+  "urls": [
+    "https://calendar.google.com/calendar/u/0/r/week",
+    "https://mail.google.com/mail/u/0/#inbox",
+    "https://github.com/notifications"
+  ],
+  "apps": [
+    "Visual Studio Code",
+    "Slack",
+    "iTerm"
+  ],
+  "plugins": [
+    "code",
+    "iTerm",
+    "layout"
+  ],
+  "layouts": {
+    "single": {
+      "Built-in Retina Display": [
+        { "slot": "lft_half_all", "app": "code"          },
+        { "slot": "rgt_thrd_mid", "app": "Slack"         },
+        { "slot": "rgt_thrd_bot", "app": "iTerm"         },
+        { "slot": "rgt_thrd_top", "app": "Google Chrome" }
+      ]
+    },
+    "dual": {
+      "Built-in Retina Display": [
+        { "slot": "lft_half_all", "app": "Slack"   },
+        { "slot": "rgt_qrtr_top", "app": "Spotify" },
+        { "slot": "rgt_qrtr_bot", "app": "iTerm"   }
+      ],
+      "LS27D60xU": [
+        { "slot": "lft_half_all", "app": "code"          },
+        { "slot": "rgt_half_all", "app": "Google Chrome" }
+      ]
+    },
+    "triple": {
+      "Built-in Retina Display": [
+        { "slot": "lft_half_all", "app": "Slack"   },
+        { "slot": "rgt_half_all", "app": "Spotify" }
+      ],
+      "LS27D60xU (1)": [
+        { "slot": "lft_half_all", "app": "code"          },
+        { "slot": "rgt_half_all", "app": "Google Chrome" }
+      ],
+      "LS27D60xU (2)": [
+        { "slot": "lft_half_all", "app": "iTerm"   },
+        { "slot": "rgt_qrtr_top", "app": "ChatGPT" },
+        { "slot": "rgt_qrtr_bot", "app": "Notion"  }
+      ]
+    }
+  }
+}
