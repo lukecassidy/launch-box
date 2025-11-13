@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 ###############################################################################
 # Description:
-#     This script reads a YAML config file (box.yaml) that contains URLs,
+#     This script reads a YAML or JSON config file that contains URLs,
 #     app names, and plugins. It opens URLs, launches apps, and runs plugins.
 #
 # Usage: ./eat.sh [options]
@@ -30,19 +30,26 @@ Options:
   -d, --dry-run         Print actions without opening anything
   -h, --help            Show this help and exit
 
-Config format (YAML):
-  urls:
-    - https://calendar.google.com
-    - https://mail.google.com
+Config format (YAML or JSON):
 
-  apps:
-    - Visual Studio Code
-    - Slack
-    - iTerm
+  YAML:
+    urls:
+      - https://calendar.google.com
+      - https://mail.google.com
+    apps:
+      - Visual Studio Code
+      - Slack
+      - iTerm
+    plugins:
+      - iTerm
+      - layout
 
-  plugins:
-    - iTerm
-    - layout
+  JSON:
+    {
+      "urls": ["https://calendar.google.com"],
+      "apps": ["Visual Studio Code", "Slack", "iTerm"],
+      "plugins": ["iTerm", "layout"]
+    }
 
 EOF
 }
@@ -80,6 +87,19 @@ check_config_file() {
     return 0
 }
 
+# detect config file format (yaml or json)
+detect_config_format() {
+    local cfg="$1"
+    local ext="${cfg##*.}" # get file extension
+
+    # Check by extension first
+    [[ "${ext}" == "json" ]] && { echo "json"; return 0; }
+    [[ "${ext}" =~ ^(yaml|yml)$ ]] && { echo "yaml"; return 0; }
+
+    log ERROR "Unable to determine config file format for '$cfg'"
+    return 1
+}
+
 # validate URLs
 is_valid_url() {
     if [[ "$1" =~ ^https?:// ]]; then
@@ -91,8 +111,15 @@ is_valid_url() {
 
 # check if core dependencies are installed
 check_core_dependencies() {
-    local -a deps=(open yq)
+    local format="$1"
+    local -a deps=(open)
     local -a missing=()
+
+    if [[ "$format" == "json" ]]; then
+        deps+=(jq)
+    else
+        deps+=(yq)
+    fi
 
     for dep in "${deps[@]}"; do
         if ! is_cmd_installed "$dep"; then
@@ -111,10 +138,15 @@ check_core_dependencies() {
 
 # open URLs
 open_urls() {
-    local cfg="$1" dry="$2"
+    local cfg="$1" dry="$2" format="$3"
     log INFO "Opening URLs..."
     local urls
-    urls=$(yq eval '.urls[]' "$cfg" 2>/dev/null)
+
+    if [[ "$format" == "json" ]]; then
+        urls=$(jq -r '.urls[]?' "$cfg" 2>/dev/null)
+    else
+        urls=$(yq eval '.urls[]' "$cfg" 2>/dev/null)
+    fi
 
     if [[ -z "$urls" ]]; then
         log INFO "No URLs configured."
@@ -145,10 +177,15 @@ open_urls() {
 
 # launch apps
 open_apps() {
-    local cfg="$1" dry="$2"
+    local cfg="$1" dry="$2" format="$3"
     log INFO "Opening Applications..."
     local apps
-    apps=$(yq eval '.apps[]' "$cfg" 2>/dev/null)
+
+    if [[ "$format" == "json" ]]; then
+        apps=$(jq -r '.apps[]?' "$cfg" 2>/dev/null)
+    else
+        apps=$(yq eval '.apps[]' "$cfg" 2>/dev/null)
+    fi
 
     if [[ -z "$apps" ]]; then
         log INFO "No apps configured."
@@ -178,10 +215,15 @@ open_apps() {
 
 # configure apps via plugins
 configure_apps() {
-    local cfg="$1" dry="$2"
+    local cfg="$1" dry="$2" format="$3"
     log INFO "Configuring Applications..."
     local plugins
-    plugins=$(yq eval '.plugins[]' "$cfg" 2>/dev/null)
+
+    if [[ "$format" == "json" ]]; then
+        plugins=$(jq -r '.plugins[]?' "$cfg" 2>/dev/null)
+    else
+        plugins=$(yq eval '.plugins[]' "$cfg" 2>/dev/null)
+    fi
 
     if [[ -z "$plugins" ]]; then
         log INFO "No plugins configured."
@@ -207,7 +249,7 @@ configure_apps() {
 
 # main
 main() {
-    local cfg dry_run
+    local cfg dry_run format
 
     # handle help before anything else
     for arg in "$@"; do
@@ -224,24 +266,29 @@ main() {
     parsed=$(parse_args "$@")
     read -r cfg dry_run <<< "$parsed"
 
-    log INFO "Checking core dependencies..."
-    check_core_dependencies || exit 1
-
     log INFO "Checking config file: '$cfg'..."
     check_config_file "$cfg" || exit 1
 
+    # detect config format
+    log INFO "Detecting config file format..."
+    format=$(detect_config_format "$cfg") || exit 1
+    log INFO "Config format detected: $format"
+
+    log INFO "Checking core dependencies..."
+    check_core_dependencies "$format" || exit 1
+
     # open URLs
     log INFO "Nom nom nom."
-    open_urls "$cfg" "$dry_run"
+    open_urls "$cfg" "$dry_run" "$format"
 
     # open apps
     log INFO "Nom nom nom nom."
-    open_apps "$cfg" "$dry_run"
+    open_apps "$cfg" "$dry_run" "$format"
     sleep 2 # wait for apps to launch
 
     # configure apps
     log INFO "Nom nom nom nom nom."
-    configure_apps "$cfg" "$dry_run"
+    configure_apps "$cfg" "$dry_run" "$format"
 
     log INFO "Nom nom nom nom nom nom."
     log INFO "Finished."
