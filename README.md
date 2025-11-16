@@ -74,7 +74,7 @@ You can run eat.sh manually, on startup, or add a menu bar shortcut. I like this
 3. Add `"/Path/to/repo/launch-box/eat.sh" "$@"`
 4. Save as `LaunchBox`
 
-## Add To Menu Bar
+### Add To Menu Bar
 5. Open Shortcuts → New Shortcut → Open App.
 6. Select `LaunchBox`
 7. Click "i" icon & Turn on 'Pin in Menu Bar'.
