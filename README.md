@@ -17,36 +17,48 @@ cd launch-box
 chmod +x eat.sh
 
 # Install dependencies
-brew install yq  # YAML parser
+brew install jq
 ```
 
 ---
 
 ## Config
-The default config file is `box.yaml` in the project root with three sections: `urls`, `apps` and `plugins`.
+The default config file is `box.json` in the project root with four sections: `urls`, `apps`, `plugins`, and `layouts`.
 
-`box.yaml`:
-```yaml
-urls:
-  - https://calendar.google.com/calendar/u/0/r/week
-  - https://mail.google.com/mail/u/0/#inbox
-  - https://github.com/notifications
-
-apps:
-  - Visual Studio Code
-  - Slack
-  - iTerm
-
-plugins:
-  - code    # Merge VS Code windows
-  - iTerm   # Configure iTerm (split panes, run commands)
-  - layout  # Arrange windows/screens via Hammerspoon
+`box.json`:
+```json
+{
+  "urls": [
+    "https://calendar.google.com/calendar/u/0/r/week",
+    "https://mail.google.com/mail/u/0/#inbox",
+    "https://github.com/notifications"
+  ],
+  "apps": [
+    "Visual Studio Code",
+    "Slack",
+    "iTerm"
+  ],
+  "plugins": [
+    "code",
+    "iTerm",
+    "layout"
+  ],
+  "layouts": {
+    "single": {
+      "Built-in Retina Display": [
+        { "slot": "lft_half_all", "app": "code" },
+        { "slot": "rgt_half_all", "app": "Slack" }
+      ]
+    }
+  }
+}
 ```
 
 Sections:
 - **urls**: Any valid `http`/`https` links. Opened in your default browser.
 - **apps**: Must match names in `/Applications` (e.g. `Visual Studio Code`, `Google Chrome`, `Slack`).
 - **plugins**: Each entry corresponds to a script in `plugins/` for post-launch setup (e.g. custom app configs or window layouts).
+- **layouts**: Hammerspoon window layout configurations for different screen setups (`single`, `dual`, `triple`).
 
 ---
 
@@ -58,8 +70,8 @@ Flags
 
 Examples:
 ```bash
-./eat.sh                # Use the default config (box.yaml)
-./eat.sh -c work.yaml   # Use a custom config file
+./eat.sh                # Use the default config (box.json)
+./eat.sh -c work.json   # Use a custom config file
 ./eat.sh -d             # Dry run
 ```
 
@@ -92,6 +104,6 @@ After granting access, try running the script again.
 ---
 
 ## TODO
-- [ ] Wire up layout config to script functionality
+- [ ] Elegant screen name handling
 - [ ] Support multiple Chrome profiles
 - [ ] Tidy up to be a lot more user friendly

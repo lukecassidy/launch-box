@@ -5,49 +5,25 @@
 --       System Preferences > Security & Privacy > Privacy > Accessibility
 hs.ipc.cliInstall()
 
--- Layouts for different monitor setups (using static screen names)
-local layouts = {
+-- Load layouts from symlinkedconfig file
+-- hs.configdir gives us ~/.hammerspoon
+local configPath = hs.configdir .. "/plugins/launch-box-config.json"
 
-    -- Single-monitor (laptop only)
-    single = {
-        ["Built-in Retina Display"] = {
-            { slot = "lft_half_all", app = "code" },
-            { slot = "rgt_thrd_mid", app = "Slack" },
-            { slot = "rgt_thrd_bot", app = "iTerm" },
-            { slot = "rgt_thrd_top", app = "Google Chrome" },
-        },
-    },
-
-    -- Dual-monitor (laptop + one external)
-    dual = {
-        ["Built-in Retina Display"] = {
-            { slot = "lft_half_all", app = "Slack" },
-            { slot = "rgt_qrtr_top", app = "Spotify" },
-            { slot = "rgt_qrtr_bot", app = "iTerm" },
-        },
-        ["LS27D60xU"] = {
-            { slot = "lft_half_all", app = "code" },
-            { slot = "rgt_half_all", app = "Google Chrome" },
-        },
-    },
-
-    -- Triple-monitor (laptop + two externals)
-    triple = {
-        ["Built-in Retina Display"] = {
-            { slot = "lft_half_all", app = "Slack" },
-            { slot = "rgt_half_all", app = "Spotify" },
-        },
-        ["LS27D60xU (1)"] = {
-            { slot = "lft_half_all", app = "code" },
-            { slot = "rgt_half_all", app = "Google Chrome" },
-        },
-        ["LS27D60xU (2)"] = {
-            { slot = "lft_half_all", app = "iTerm" },
-            { slot = "rgt_qrtr_top", app = "ChatGPT" },
-            { slot = "rgt_qrtr_bot", app = "Notion" },
-        },
-    },
-}
+-- Load layout definitions from config
+local layouts = {}
+local file = io.open(configPath, "r")
+if file then
+    local content = file:read("*all")
+    file:close()
+    local config = hs.json.decode(content)
+    if config and config.layouts then
+        layouts = config.layouts
+    else
+        hs.printf("No layouts found in config: %s", configPath)
+    end
+else
+    hs.printf("Failed to load config from: %s", configPath)
+end
 
 -- Presets for window positions
 local rects = {
@@ -126,6 +102,14 @@ function applyWorkspace(screenMode)
 
     -- Auto-detect layout mode based on number of screens if not provided
     screenMode = screenMode or ({ [2]="dual", [3]="triple" })[screenCount] or "single"
+
+    -- Check if layouts are loaded
+    if not layouts or not layouts[screenMode] then
+        hs.alert.show("No layout configuration found for: " .. screenMode)
+        hs.printf("Layouts table: %s", layouts and "exists" or "nil")
+        hs.printf("Available modes: %s", layouts and table.concat((function() local t={} for k in pairs(layouts) do table.insert(t,k) end return t end)(), ", ") or "none")
+        return
+    end
 
     -- Get available screens by name
     local availableScreens = getScreens()

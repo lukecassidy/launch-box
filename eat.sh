@@ -3,8 +3,8 @@ set -Eeuo pipefail
 
 ###############################################################################
 # Description:
-#     This script reads a YAML or JSON config file that contains URLs,
-#     app names, and plugins. It opens URLs, launches apps, and runs plugins.
+#     This script reads a config file and opens contains URLs, app names
+# and plugins.
 #
 # Usage: ./eat.sh [options]
 ###############################################################################
@@ -26,30 +26,60 @@ usage() {
 Usage: $(basename "$0") [options]
 
 Options:
-  -c, --config <file>   Path to config file (default: box.yaml)
+  -c, --config <file>   Path to config file (default: box.json)
   -d, --dry-run         Print actions without opening anything
   -h, --help            Show this help and exit
 
-Config format (YAML or JSON):
-
-  YAML:
-    urls:
-      - https://calendar.google.com
-      - https://mail.google.com
-    apps:
-      - Visual Studio Code
-      - Slack
-      - iTerm
-    plugins:
-      - iTerm
-      - layout
-
-  JSON:
-    {
-      "urls": ["https://calendar.google.com"],
-      "apps": ["Visual Studio Code", "Slack", "iTerm"],
-      "plugins": ["iTerm", "layout"]
+Config file example:
+  {
+    "urls": [
+      "https://calendar.google.com"
+    ],
+    "apps": [
+      "Visual Studio Code",
+      "Slack",
+      "iTerm"
+    ],
+    "plugins": [
+      "iTerm",
+      "layout"
+    ],
+    "layouts": {
+      "single": {
+        "Built-in Retina Display": [
+          { "slot": "lft_half_all", "app": "code" },
+          { "slot": "rgt_half_all", "app": "Slack" }
+        ]
+      }
     }
+  }
+
+Config file example:
+  {
+    "urls": [
+      "https://calendar.google.com/calendar/u/0/r/week",
+      "https://mail.google.com/mail/u/0/#inbox",
+      "https://github.com/notifications"
+    ],
+    "apps": [
+      "Visual Studio Code",
+      "Slack",
+      "iTerm"
+    ],
+    "plugins": [
+      "code",
+      "iTerm",
+      "layout"
+    ],
+    "layouts": {
+      "single": {
+        "Built-in Retina Display": [
+          { "slot": "lft_half_all", "app": "code" },
+          { "slot": "rgt_half_all", "app": "Slack" }
+        ]
+      }
+    }
+  }
 
 EOF
 }
@@ -57,7 +87,7 @@ EOF
 # parse command line arguments
 parse_args() {
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local cfg="$script_dir/box.yaml"
+    local cfg="$script_dir/box.json"
     local dry=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -87,40 +117,18 @@ check_config_file() {
     return 0
 }
 
-# detect config file format (yaml or json)
-detect_config_format() {
-    local cfg="$1"
-    local ext="${cfg##*.}" # get file extension
-
-    # check by extension first
-    [[ "${ext}" == "json" ]] && { echo "json"; return 0; }
-    [[ "${ext}" =~ ^(yaml|yml)$ ]] && { echo "yaml"; return 0; }
-
-    log ERROR "Unable to determine config file format for '$cfg'"
-    return 1
-}
 
 # parse config file once and return all data
 parse_config() {
-    local cfg="$1" format="$2"
+    local cfg="$1"
 
-    if [[ "$format" == "json" ]]; then
-        # parse entire config at once using jq
-        jq -r '{
-            urls: [.urls[]? // empty],
-            apps: [.apps[]? // empty],
-            plugins: [.plugins[]? // empty],
-            layouts: .layouts
-        }' "$cfg" 2>/dev/null
-    else
-        # parse using yq and convert to JSON for consistent handling
-        yq eval -o=json '{
-            "urls": .urls,
-            "apps": .apps,
-            "plugins": .plugins,
-            "layouts": .layouts
-        }' "$cfg" 2>/dev/null
-    fi
+    # parse entire config at once using jq
+    jq -r '{
+        urls: [.urls[]? // empty],
+        apps: [.apps[]? // empty],
+        plugins: [.plugins[]? // empty],
+        layouts: .layouts
+    }' "$cfg" 2>/dev/null
 }
 
 # validate URLs
@@ -134,15 +142,8 @@ is_valid_url() {
 
 # check if core dependencies are installed
 check_core_dependencies() {
-    local format="$1"
-    local -a deps=(open)
+    local -a deps=(open jq)
     local -a missing=()
-
-    if [[ "$format" == "json" ]]; then
-        deps+=(jq)
-    else
-        deps+=(yq)
-    fi
 
     for dep in "${deps[@]}"; do
         if ! is_cmd_installed "$dep"; then
@@ -251,22 +252,28 @@ configure_apps() {
 
 # configure layout
 configure_layout() {
-    local layout="$1" dry="$2"
+    local cfg="$1" dry="$2"
     log INFO "Configuring Layout..."
 
-    if [[ -z "$layout" || "$layout" == "null" ]]; then
-        log INFO "No layout configured."
+    if (( dry )); then
+        log INFO "Would symlink config to Hammerspoon"
         return 0
     fi
 
-    # TODO: Implement layout configuration
-    log INFO "Layout data received (not yet implemented):"
-    echo "$layout" | jq '.' 2>/dev/null || echo "$layout"
+    # Get absolute path to config file
+    local config_json="$(cd "$(dirname "$cfg")" && pwd)/$(basename "$cfg")"
+
+    # Symlink config to ~/.hammerspoon/plugins/ for Hammerspoon to load
+    local hs_config_link="$HOME/.hammerspoon/plugins/launch-box-config.json"
+    mkdir -p "$(dirname "$hs_config_link")"
+    ln -sf "$config_json" "$hs_config_link"
+
+    log INFO "Config linked for Hammerspoon: $config_json"
 }
 
 # main
 main() {
-    local cfg dry_run format
+    local cfg dry_run
 
     # handle help before anything else
     for arg in "$@"; do
@@ -286,25 +293,19 @@ main() {
     log INFO "Checking config file: '$cfg'..."
     check_config_file "$cfg" || exit 1
 
-    # detect config format
-    log INFO "Detecting config file format..."
-    format=$(detect_config_format "$cfg") || exit 1
-    log INFO "Config format detected: $format"
-
     log INFO "Checking core dependencies..."
-    check_core_dependencies "$format" || exit 1
+    check_core_dependencies || exit 1
 
     # parse config once
     log INFO "Parsing config file..."
     local config_data
-    config_data=$(parse_config "$cfg" "$format") || exit 1
+    config_data=$(parse_config "$cfg") || exit 1
 
     # extract parsed data
-    local urls apps plugins layouts
+    local urls apps plugins
     urls=$(echo "$config_data" | jq -r '.urls[]?' 2>/dev/null)
     apps=$(echo "$config_data" | jq -r '.apps[]?' 2>/dev/null)
     plugins=$(echo "$config_data" | jq -r '.plugins[]?' 2>/dev/null)
-    layouts=$(echo "$config_data" | jq -c '.layouts' 2>/dev/null)
 
     # open URLs
     log INFO "Nom nom nom."
@@ -321,7 +322,7 @@ main() {
 
     # configure layout
     log INFO "Nom nom nom nom nom nom."
-    configure_layout "$layouts" "$dry_run"
+    configure_layout "$cfg" "$dry_run"
 
     log INFO "Nom nom nom nom nom nom nom."
     log INFO "Finished."
