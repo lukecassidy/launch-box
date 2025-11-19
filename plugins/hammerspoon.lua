@@ -5,27 +5,27 @@
 --       System Preferences > Security & Privacy > Privacy > Accessibility
 hs.ipc.cliInstall()
 
--- Layouts for different monitor setups
+-- Layouts for different monitor setups (using static screen names)
 local layouts = {
 
     -- Single-monitor (laptop only)
     single = {
-        [1] = {  -- Primary screen (built-in display)
+        ["Built-in Retina Display"] = {
             { slot = "lft_half_all", app = "code" },
-            { slot = "rgt_thrd_top", app = "Slack" },
-            { slot = "rgt_thrd_mid", app = "iTerm" },
-            { slot = "rgt_thrd_bot", app = "Google Chrome" },
+            { slot = "rgt_thrd_mid", app = "Slack" },
+            { slot = "rgt_thrd_bot", app = "iTerm" },
+            { slot = "rgt_thrd_top", app = "Google Chrome" },
         },
     },
 
     -- Dual-monitor (laptop + one external)
     dual = {
-        [1] = {  -- Primary screen (built-in display)
+        ["Built-in Retina Display"] = {
             { slot = "lft_half_all", app = "Slack" },
             { slot = "rgt_qrtr_top", app = "Spotify" },
             { slot = "rgt_qrtr_bot", app = "iTerm" },
         },
-        [2] = {  -- First external monitor
+        ["LS27D60xU"] = {
             { slot = "lft_half_all", app = "code" },
             { slot = "rgt_half_all", app = "Google Chrome" },
         },
@@ -33,15 +33,15 @@ local layouts = {
 
     -- Triple-monitor (laptop + two externals)
     triple = {
-        [1] = {  -- Primary screen (built-in display)
+        ["Built-in Retina Display"] = {
             { slot = "lft_half_all", app = "Slack" },
             { slot = "rgt_half_all", app = "Spotify" },
         },
-        [2] = {  -- First external monitor
+        ["LS27D60xU (1)"] = {
             { slot = "lft_half_all", app = "code" },
             { slot = "rgt_half_all", app = "Google Chrome" },
         },
-        [3] = {  -- Second external monitor
+        ["LS27D60xU (2)"] = {
             { slot = "lft_half_all", app = "iTerm" },
             { slot = "rgt_qrtr_top", app = "ChatGPT" },
             { slot = "rgt_qrtr_bot", app = "Notion" },
@@ -122,25 +122,24 @@ end
 
 -- Apply the configured workspace.
 function applyWorkspace(screenMode)
-    local allScreens = hs.screen.allScreens()
-    local screenCount = #allScreens
-
-    -- Ensure primary screen is always first
-    local orderedScreens = { hs.screen.primaryScreen() }
-    for _, screen in ipairs(allScreens) do
-        if screen ~= orderedScreens[1] then
-            table.insert(orderedScreens, screen)
-        end
-    end
+    local screenCount = #hs.screen.allScreens()
 
     -- Auto-detect layout mode based on number of screens if not provided
     screenMode = screenMode or ({ [2]="dual", [3]="triple" })[screenCount] or "single"
 
-    for screenIndex, layout in pairs(layouts[screenMode]) do
-        if orderedScreens[screenIndex] then
-            placeWindows(orderedScreens[screenIndex], layout)
+    -- Get available screens by name
+    local availableScreens = getScreens()
+
+    -- Apply layout using static screen names defined in config
+    for screenName, layout in pairs(layouts[screenMode]) do
+        local screen = availableScreens[screenName]
+        if screen then
+            placeWindows(screen, layout)
+        else
+            hs.alert.show("Screen not found: " .. screenName)
         end
     end
+
     hs.alert.show("Layout applied: " .. screenMode .. " (" .. screenCount .. " screens)")
 end
 
