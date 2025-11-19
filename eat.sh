@@ -109,14 +109,16 @@ parse_config() {
         jq -r '{
             urls: [.urls[]? // empty],
             apps: [.apps[]? // empty],
-            plugins: [.plugins[]? // empty]
+            plugins: [.plugins[]? // empty],
+            layouts: .layouts
         }' "$cfg" 2>/dev/null
     else
         # parse using yq and convert to JSON for consistent handling
         yq eval -o=json '{
             "urls": .urls,
             "apps": .apps,
-            "plugins": .plugins
+            "plugins": .plugins,
+            "layouts": .layouts
         }' "$cfg" 2>/dev/null
     fi
 }
@@ -247,6 +249,21 @@ configure_apps() {
     done <<< "$plugins"
 }
 
+# configure layout
+configure_layout() {
+    local layout="$1" dry="$2"
+    log INFO "Configuring Layout..."
+
+    if [[ -z "$layout" || "$layout" == "null" ]]; then
+        log INFO "No layout configured."
+        return 0
+    fi
+
+    # TODO: Implement layout configuration
+    log INFO "Layout data received (not yet implemented):"
+    echo "$layout" | jq '.' 2>/dev/null || echo "$layout"
+}
+
 # main
 main() {
     local cfg dry_run format
@@ -283,10 +300,11 @@ main() {
     config_data=$(parse_config "$cfg" "$format") || exit 1
 
     # extract parsed data
-    local urls apps plugins
+    local urls apps plugins layouts
     urls=$(echo "$config_data" | jq -r '.urls[]?' 2>/dev/null)
     apps=$(echo "$config_data" | jq -r '.apps[]?' 2>/dev/null)
     plugins=$(echo "$config_data" | jq -r '.plugins[]?' 2>/dev/null)
+    layouts=$(echo "$config_data" | jq -c '.layouts' 2>/dev/null)
 
     # open URLs
     log INFO "Nom nom nom."
@@ -301,7 +319,11 @@ main() {
     log INFO "Nom nom nom nom nom."
     configure_apps "$plugins" "$dry_run"
 
+    # configure layout
     log INFO "Nom nom nom nom nom nom."
+    configure_layout "$layouts" "$dry_run"
+
+    log INFO "Nom nom nom nom nom nom nom."
     log INFO "Finished."
 }
 
