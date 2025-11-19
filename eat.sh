@@ -71,7 +71,7 @@ parse_args() {
         esac
     done
 
-    # Output parsed vals to stdout for caller capture.
+    # output parsed vals to stdout for caller capture.
     echo "$cfg $dry"
 }
 
@@ -92,12 +92,33 @@ detect_config_format() {
     local cfg="$1"
     local ext="${cfg##*.}" # get file extension
 
-    # Check by extension first
+    # check by extension first
     [[ "${ext}" == "json" ]] && { echo "json"; return 0; }
     [[ "${ext}" =~ ^(yaml|yml)$ ]] && { echo "yaml"; return 0; }
 
     log ERROR "Unable to determine config file format for '$cfg'"
     return 1
+}
+
+# parse config file once and return all data
+parse_config() {
+    local cfg="$1" format="$2"
+
+    if [[ "$format" == "json" ]]; then
+        # parse entire config at once using jq
+        jq -r '{
+            urls: [.urls[]? // empty],
+            apps: [.apps[]? // empty],
+            plugins: [.plugins[]? // empty]
+        }' "$cfg" 2>/dev/null
+    else
+        # parse using yq and convert to JSON for consistent handling
+        yq eval -o=json '{
+            "urls": .urls,
+            "apps": .apps,
+            "plugins": .plugins
+        }' "$cfg" 2>/dev/null
+    fi
 }
 
 # validate URLs
@@ -138,17 +159,10 @@ check_core_dependencies() {
 
 # open URLs
 open_urls() {
-    local cfg="$1" dry="$2" format="$3"
+    local urls="$1" dry="$2"
     log INFO "Opening URLs..."
-    local urls
 
-    if [[ "$format" == "json" ]]; then
-        urls=$(jq -r '.urls[]?' "$cfg" 2>/dev/null)
-    else
-        urls=$(yq eval '.urls[]' "$cfg" 2>/dev/null)
-    fi
-
-    if [[ -z "$urls" ]]; then
+    if [[ -z "$urls" || "$urls" == "null" ]]; then
         log INFO "No URLs configured."
         return 0
     fi
@@ -177,17 +191,10 @@ open_urls() {
 
 # launch apps
 open_apps() {
-    local cfg="$1" dry="$2" format="$3"
+    local apps="$1" dry="$2"
     log INFO "Opening Applications..."
-    local apps
 
-    if [[ "$format" == "json" ]]; then
-        apps=$(jq -r '.apps[]?' "$cfg" 2>/dev/null)
-    else
-        apps=$(yq eval '.apps[]' "$cfg" 2>/dev/null)
-    fi
-
-    if [[ -z "$apps" ]]; then
+    if [[ -z "$apps" || "$apps" == "null" ]]; then
         log INFO "No apps configured."
         return 0
     fi
@@ -215,17 +222,10 @@ open_apps() {
 
 # configure apps via plugins
 configure_apps() {
-    local cfg="$1" dry="$2" format="$3"
+    local plugins="$1" dry="$2"
     log INFO "Configuring Applications..."
-    local plugins
 
-    if [[ "$format" == "json" ]]; then
-        plugins=$(jq -r '.plugins[]?' "$cfg" 2>/dev/null)
-    else
-        plugins=$(yq eval '.plugins[]' "$cfg" 2>/dev/null)
-    fi
-
-    if [[ -z "$plugins" ]]; then
+    if [[ -z "$plugins" || "$plugins" == "null" ]]; then
         log INFO "No plugins configured."
         return 0
     fi
@@ -262,9 +262,9 @@ main() {
     log INFO "Unpacking l(a)unch box."
 
     # parse command line arguments
-    local parsed
-    parsed=$(parse_args "$@")
-    read -r cfg dry_run <<< "$parsed"
+    local args
+    args=$(parse_args "$@")
+    read -r cfg dry_run <<< "$args"
 
     log INFO "Checking config file: '$cfg'..."
     check_config_file "$cfg" || exit 1
@@ -277,18 +277,29 @@ main() {
     log INFO "Checking core dependencies..."
     check_core_dependencies "$format" || exit 1
 
+    # parse config once
+    log INFO "Parsing config file..."
+    local config_data
+    config_data=$(parse_config "$cfg" "$format") || exit 1
+
+    # extract parsed data
+    local urls apps plugins
+    urls=$(echo "$config_data" | jq -r '.urls[]?' 2>/dev/null)
+    apps=$(echo "$config_data" | jq -r '.apps[]?' 2>/dev/null)
+    plugins=$(echo "$config_data" | jq -r '.plugins[]?' 2>/dev/null)
+
     # open URLs
     log INFO "Nom nom nom."
-    open_urls "$cfg" "$dry_run" "$format"
+    open_urls "$urls" "$dry_run"
 
     # open apps
     log INFO "Nom nom nom nom."
-    open_apps "$cfg" "$dry_run" "$format"
+    open_apps "$apps" "$dry_run"
     sleep 2 # wait for apps to launch
 
     # configure apps
     log INFO "Nom nom nom nom nom."
-    configure_apps "$cfg" "$dry_run" "$format"
+    configure_apps "$plugins" "$dry_run"
 
     log INFO "Nom nom nom nom nom nom."
     log INFO "Finished."
