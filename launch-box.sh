@@ -40,10 +40,16 @@ Config file example:
       "Slack",
       "iTerm"
     ],
-    "plugins": [
-      "code",
-      "iTerm"
-    ],
+    "plugins": {
+      "code": {},
+      "iTerm": {
+        "panes": [
+          "clear; figlet luke",
+          "clear; figlet is",
+          "clear; figlet cool"
+        ]
+      }
+    },
     "layouts": {
       "single": {
         "Built-in Retina Display": [
@@ -111,7 +117,7 @@ parse_config() {
     jq -r '{
         urls: [.urls[]? // empty],
         apps: [.apps[]? // empty],
-        plugins: [.plugins[]? // empty],
+        plugins: [.plugins // {} | keys[]],
         layouts: .layouts
     }' "$cfg" 2>/dev/null
 }
@@ -210,13 +216,16 @@ open_apps() {
 
 # configure apps via plugins
 configure_apps() {
-    local plugins="$1" dry="$2"
+    local plugins="$1" cfg="$2" dry="$3"
     log INFO "Configuring Applications..."
 
     if [[ -z "$plugins" || "$plugins" == "null" ]]; then
         log INFO "No plugins configured."
         return 0
     fi
+
+    # Export config path for plugins to use
+    export LAUNCH_BOX_CONFIG="$cfg"
 
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     while IFS= read -r plugin; do
@@ -311,7 +320,7 @@ main() {
     sleep 2 # wait for apps to launch
 
     # configure apps
-    configure_apps "$plugins" "$dry_run"
+    configure_apps "$plugins" "$cfg" "$dry_run"
 
     # configure layouts
     configure_layouts "$cfg" "$dry_run"

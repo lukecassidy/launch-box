@@ -13,20 +13,39 @@ if ! is_cmd_installed "osascript"; then
     log ERROR "Skipping iTerm configuration: osascript not installed"
     exit_or_return 0
 fi
+
+# check if iTerm is installed
 if ! is_app_installed "iTerm"; then
     log ERROR "Skipping iTerm configuration: iTerm not installed"
     exit_or_return 0
 fi
 
+# check for jq
+if ! is_cmd_installed "jq"; then
+    log ERROR "Skipping iTerm configuration: jq not installed"
+    exit_or_return 0
+fi
 
-# commands to run in each pane
-pane1_command='clear; figlet luke is cool'
-pane2_command='clear; echo "K8s: $(kubectl config current-context):$(kubectl config view --minify --output '\''jsonpath={..namespace}'\'' || echo default)"'
-pane3_command='clear; echo "AWS: ${$(aws_prompt_info):-default}"'
+# check for config path
+if [[ -z "${LAUNCH_BOX_CONFIG:-}" ]]; then
+    log ERROR "Skipping iTerm configuration: config file path not provided"
+    exit_or_return 0
+fi
 
-export PANE1_COMMAND="$pane1_command"
-export PANE2_COMMAND="$pane2_command"
-export PANE3_COMMAND="$pane3_command"
+# get pane commands from config
+pane_commands=$(jq -r '.plugins.iTerm.panes[]?' "$LAUNCH_BOX_CONFIG" 2>/dev/null)
+if [[ -z "$pane_commands" ]]; then
+    log WARNING "No iTerm pane commands defined in config, skipping"
+    exit_or_return 0
+fi
+
+# read commands into array
+IFS=$'\n' read -d '' -r -a commands <<< "$pane_commands" || true
+
+# export pane commands for AppleScript
+export PANE1_COMMAND="${commands[0]:-clear}"
+export PANE2_COMMAND="${commands[1]:-clear}"
+export PANE3_COMMAND="${commands[2]:-clear}"
 
 # Create a three-pane workspace (top plus two lower panes) and run starter commands
 if ! osascript <<'EOF'; then

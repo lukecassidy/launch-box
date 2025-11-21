@@ -9,10 +9,16 @@
     "Slack",
     "iTerm"
   ],
-  "plugins": [
-    "code",
-    "iTerm"
-  ],
+  "plugins": {
+    "code": {},
+    "iTerm": {
+      "panes": [
+        "clear; figlet luke",
+        "clear; figlet is",
+        "clear; figlet cool"
+      ]
+    }
+  },
   "layouts": {
     "single": {
       "Built-in Retina Display": [

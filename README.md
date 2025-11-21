@@ -1,4 +1,4 @@
-# l(a)unch‑box
+# launch‑box
 
 Open your daily tabs and apps on macOS with one command, powered by a simple config file.
 
@@ -38,10 +38,16 @@ The default config file is `launch-config.json` in the project root with four se
     "Slack",
     "iTerm"
   ],
-  "plugins": [
-    "code",
-    "iTerm"
-  ],
+  "plugins": {
+    "code": {},
+    "iTerm": {
+      "panes": [
+        "clear; figlet luke",
+        "clear; figlet is",
+        "clear; figlet cool"
+      ]
+    }
+  },
   "layouts": {
     "single": {
       "Built-in Retina Display": [
