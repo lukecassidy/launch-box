@@ -54,33 +54,6 @@ Config file example:
     }
   }
 
-Config file example:
-  {
-    "urls": [
-      "https://calendar.google.com/calendar/u/0/r/week",
-      "https://mail.google.com/mail/u/0/#inbox",
-      "https://github.com/notifications"
-    ],
-    "apps": [
-      "Visual Studio Code",
-      "Slack",
-      "iTerm"
-    ],
-    "plugins": [
-      "code",
-      "iTerm",
-      "layout"
-    ],
-    "layouts": {
-      "single": {
-        "Built-in Retina Display": [
-          { "slot": "lft_half_all", "app": "code" },
-          { "slot": "rgt_half_all", "app": "Slack" }
-        ]
-      }
-    }
-  }
-
 EOF
 }
 
