@@ -26,7 +26,7 @@ usage() {
 Usage: $(basename "$0") [options]
 
 Options:
-  -c, --config <file>   Path to config file (default: box.json)
+  -c, --config <file>   Path to config file (default: launch-config.json)
   -d, --dry-run         Print actions without opening anything
   -h, --help            Show this help and exit
 
@@ -60,7 +60,7 @@ EOF
 # parse command line arguments
 parse_args() {
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local cfg="$script_dir/box.json"
+    local cfg="$script_dir/launch-config.json"
     local dry=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -304,23 +304,18 @@ main() {
     plugins=$(echo "$config_data" | jq -r '.plugins[]?' 2>/dev/null)
 
     # open URLs
-    log INFO "Nom nom nom."
     open_urls "$urls" "$dry_run"
 
     # open apps
-    log INFO "Nom nom nom nom."
     open_apps "$apps" "$dry_run"
     sleep 2 # wait for apps to launch
 
     # configure apps
-    log INFO "Nom nom nom nom nom."
     configure_apps "$plugins" "$dry_run"
 
     # configure layouts
-    log INFO "Nom nom nom nom nom nom."
     configure_layouts "$cfg" "$dry_run"
 
-    log INFO "Nom nom nom nom nom nom nom."
     log INFO "Finished."
 }
 

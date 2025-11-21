@@ -14,7 +14,7 @@ What started as a small time saver for my morning routine ended up being somethi
 ```bash
 git clone https://github.com/lukecassidy/launch-box.git
 cd launch-box
-chmod +x eat.sh
+chmod +x launch-box.sh
 
 # Install dependencies
 brew install jq
@@ -23,9 +23,9 @@ brew install jq
 ---
 
 ## Config
-The default config file is `box.json` in the project root with four sections: `urls`, `apps`, `plugins`, and `layouts`.
+The default config file is `launch-config.json` in the project root with four sections: `urls`, `apps`, `plugins`, and `layouts`.
 
-`box.json`:
+`launch-config.json`:
 ```json
 {
   "urls": [
@@ -69,20 +69,20 @@ Flags
 
 Examples:
 ```bash
-./eat.sh                # Use the default config (box.json)
-./eat.sh -c work.json   # Use a custom config file
-./eat.sh -d             # Dry run
+./launch-box.sh                   # Use the default config (launch-config.json)
+./launch-box.sh -c work.json      # Use a custom config file
+./launch-box.sh -d                # Dry run
 ```
 
 ---
 
 ## Run It Your Way
-You can run eat.sh manually, on startup, or add a menu bar shortcut. I like this last approach so I'll outline it here. 
+You can run launch-box.sh manually, on startup, or add a menu bar shortcut. I like this last approach so I'll outline it here.
 
 ### Make it Clickable
 1. Open Applications ▸ Automator → New Document → Application
-2. “Run Shell Script”.
-3. Add `"/Path/to/repo/launch-box/eat.sh" "$@"`
+2. "Run Shell Script".
+3. Add `"/Path/to/repo/launch-box/launch-box.sh" "$@"`
 4. Save as `LaunchBox`
 
 ### Add To Menu Bar
@@ -95,7 +95,7 @@ That's it. Now you've got a one click workspace launcher 🌯.
 ---
 
 ## Troubleshooting
-If you encounter permission issues, grant **Accessibility** permissions to the app that runs `eat.sh`. Depending on your setup, this could be iTerm2, Shortcuts, Automator etc. You can do this via:
+If you encounter permission issues, grant **Accessibility** permissions to the app that runs `launch-box.sh`. Depending on your setup, this could be iTerm2, Shortcuts, Automator etc. You can do this via:
 - System Settings → Privacy & Security → Accessibility
 
 After granting access, try running the script again.
