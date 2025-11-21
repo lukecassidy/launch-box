@@ -17,7 +17,7 @@ cd launch-box
 chmod +x launch-box.sh
 
 # Install dependencies
-brew install jq
+brew install jq hammerspoon figlet
 ```
 
 ---
@@ -109,6 +109,13 @@ After granting access, try running the script again.
 ---
 
 ## TODO
+- [ ] Dynamic Pane splitting and commands for iTerm2
 - [ ] Elegant screen name handling
-- [ ] Support multiple Chrome profiles
-- [ ] Tidy up to be a lot more user friendly
+- [ ] Interactive screen layout selection
+- [ ] Support multiple Chrome profiles (e.g., work vs personal)
+- [ ] More plugins
+  - [ ] Finder - Open recent files
+  - [ ] Spotify - play playlists
+  - [ ] Slack - Navigate to channel, set status
+  - [ ] Expand on VS Code to open projects
+

@@ -47,7 +47,7 @@ export PANE1_COMMAND="${commands[0]:-clear}"
 export PANE2_COMMAND="${commands[1]:-clear}"
 export PANE3_COMMAND="${commands[2]:-clear}"
 
-# Create a three-pane workspace (top plus two lower panes) and run starter commands
+# create a three-pane workspace (top plus two lower panes) and run starter commands
 if ! osascript <<'EOF'; then
     set pane1Command to system attribute "PANE1_COMMAND"
     set pane2Command to system attribute "PANE2_COMMAND"
