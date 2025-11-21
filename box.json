@@ -11,8 +11,7 @@
   ],
   "plugins": [
     "code",
-    "iTerm",
-    "layout"
+    "iTerm"
   ],
   "layouts": {
     "single": {

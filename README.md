@@ -40,8 +40,7 @@ The default config file is `box.json` in the project root with four sections: `u
   ],
   "plugins": [
     "code",
-    "iTerm",
-    "layout"
+    "iTerm"
   ],
   "layouts": {
     "single": {
@@ -57,8 +56,8 @@ The default config file is `box.json` in the project root with four sections: `u
 Sections:
 - **urls**: Any valid `http`/`https` links. Opened in your default browser.
 - **apps**: Must match names in `/Applications` (e.g. `Visual Studio Code`, `Google Chrome`, `Slack`).
-- **plugins**: Each entry corresponds to a script in `plugins/` for post-launch setup (e.g. custom app configs or window layouts).
-- **layouts**: Hammerspoon window layout configurations for different screen setups (`single`, `dual`, `triple`).
+- **plugins**: Each entry corresponds to a script in `plugins/` for post launch app configuration (e.g. VS Code window merging, iTerm pane setup).
+- **layouts**: Hammerspoon window layout configurations for different screen setups.
 
 ---
 

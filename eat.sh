@@ -41,8 +41,8 @@ Config file example:
       "iTerm"
     ],
     "plugins": [
-      "iTerm",
-      "layout"
+      "code",
+      "iTerm"
     ],
     "layouts": {
       "single": {
@@ -96,7 +96,7 @@ check_config_file() {
     }
 
     # warn if no URLs or apps defined
-    if [[ "$count" -eq 0 ]] then
+    if [[ "$count" -eq 0 ]]; then
         log WARNING "Config file is empty or has no URLs/apps defined"
     fi
 
@@ -222,12 +222,13 @@ configure_apps() {
     while IFS= read -r plugin; do
         [[ -z "$plugin" ]] && continue
 
-        if [[ -f "$script_dir/plugins/$plugin.sh" ]]; then
+        local plugin_path="$script_dir/plugins/$plugin.sh"
+        if [[ -f "$plugin_path" ]]; then
             log INFO "Running plugin script: '$plugin'"
             if (( dry )); then
                 : # no-op (dry run)
             else
-                source "$script_dir/plugins/$plugin.sh"
+                source "$plugin_path"
             fi
         else
             log WARNING "Plugin script not found - '$plugin'"
@@ -235,25 +236,35 @@ configure_apps() {
     done <<< "$plugins"
 }
 
-# configure layout
-configure_layout() {
+# configure window layouts via Hammerspoon
+configure_layouts() {
     local cfg="$1" dry="$2"
-    log INFO "Configuring Layout..."
+    log INFO "Configuring Layouts..."
 
-    if (( dry )); then
-        log INFO "Would symlink config to Hammerspoon"
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local layout_script="$script_dir/layout/layout.sh"
+
+    # check if layout script exists
+    if [[ ! -f "$layout_script" ]]; then
+        log INFO "Layout script not found, skipping window layout configuration"
         return 0
     fi
 
-    # Get absolute path to config file
-    local config_json="$(cd "$(dirname "$cfg")" && pwd)/$(basename "$cfg")"
+    # symlink config for Hammerspoon to read
+    if (( ! dry )); then
+        local config_json="$(cd "$(dirname "$cfg")" && pwd)/$(basename "$cfg")"
+        local hs_config_link="$HOME/.hammerspoon/plugins/launch-box-config.json"
+        mkdir -p "$(dirname "$hs_config_link")"
+        ln -sf "$config_json" "$hs_config_link"
+        log INFO "Config linked for Hammerspoon: $config_json"
+    fi
 
-    # Symlink config to ~/.hammerspoon/plugins/ for Hammerspoon to load
-    local hs_config_link="$HOME/.hammerspoon/plugins/launch-box-config.json"
-    mkdir -p "$(dirname "$hs_config_link")"
-    ln -sf "$config_json" "$hs_config_link"
-
-    log INFO "Config linked for Hammerspoon: $config_json"
+    # Run layout script
+    if (( dry )); then
+        log INFO "Would run layout configuration"
+    else
+        source "$layout_script"
+    fi
 }
 
 # main
@@ -305,9 +316,9 @@ main() {
     log INFO "Nom nom nom nom nom."
     configure_apps "$plugins" "$dry_run"
 
-    # configure layout
+    # configure layouts
     log INFO "Nom nom nom nom nom nom."
-    configure_layout "$cfg" "$dry_run"
+    configure_layouts "$cfg" "$dry_run"
 
     log INFO "Nom nom nom nom nom nom nom."
     log INFO "Finished."
