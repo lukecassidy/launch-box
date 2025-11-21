@@ -78,18 +78,30 @@ parse_args() {
     echo "$cfg $dry"
 }
 
-# does config file exist
+# check and validate config file
 check_config_file() {
     log INFO "Checking config file '$1'..."
+
+    # check file exists
     if [[ ! -f "$1" ]]; then
         log ERROR "Config file '$1' not found!"
         return 1
     fi
 
-    log INFO "Config file '$1' found."
-    return 0
-}
+    # validate JSON syntax
+    local count
+    count=$(jq '(.urls // [] | length) + (.apps // [] | length)' "$1" 2>&1) || {
+        log ERROR "Config file contains invalid JSON syntax."
+        return 1
+    }
 
+    # warn if no URLs or apps defined
+    if [[ "$count" -eq 0 ]] then
+        log WARNING "Config file is empty or has no URLs/apps defined"
+    fi
+
+    log INFO "Config file validated."
+}
 
 # parse config file once and return all data
 parse_config() {
