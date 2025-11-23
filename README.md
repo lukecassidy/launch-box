@@ -2,9 +2,7 @@
 
 Open your daily tabs and apps on macOS with one command, powered by a simple config file.
 
-Every morning, you probably open the same browser tabs, launch the same apps, configure them, and arrange windows the same way. This tool reads your config and does it all for you.
-
-What started as a small time saver for my morning routine ended up being something I use every day. So I kept refining it.
+Every morning, you probably open the same browser tabs, launch the same apps, configure them, and arrange windows the same way. This tool reads your config and does it all for you. What started as a small time saver for my morning routine ended up being something I use every day. So I kept refining it.
 
 ![launch-1280](https://github.com/user-attachments/assets/6d82b6ab-714e-4def-9516-4aca1c6e5460)
 
@@ -86,14 +84,14 @@ Examples:
 You can run launch-box.sh manually, on startup, or add a menu bar shortcut. I like this last approach so I'll outline it here.
 
 ### Make it Clickable
-1. Open Applications ▸ Automator → New Document → Application
+1. Open Applications → Automator → New Document → Application
 2. "Run Shell Script".
 3. Add `"/Path/to/repo/launch-box/launch-box.sh" "$@"`
-4. Save as `LaunchBox`
+4. Save as `Launch Box`
 
 ### Add To Menu Bar
 5. Open Shortcuts → New Shortcut → Open App.
-6. Select `LaunchBox`
+6. Select `Launch Box`
 7. Click "i" icon & Turn on 'Pin in Menu Bar'.
 
 That's it. Now you've got a one click workspace launcher 🌯.
