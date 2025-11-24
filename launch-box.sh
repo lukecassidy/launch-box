@@ -328,5 +328,5 @@ main() {
     log INFO "Finished."
 }
 
-# l(a)unch time!
+# launch time!
 main "$@"
