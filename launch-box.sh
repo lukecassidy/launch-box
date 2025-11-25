@@ -3,8 +3,7 @@ set -Eeuo pipefail
 
 ###############################################################################
 # Description:
-#     This script reads a config file and opens contains URLs, app names
-# and plugins.
+#     This script reads a config file containing URLs, app names and plugins.
 #
 # Usage: ./eat.sh [options]
 ###############################################################################
@@ -13,7 +12,7 @@ set -Eeuo pipefail
 LOG_FILE="$(dirname "${BASH_SOURCE[0]}")/launch-box.log"
 
 # rotate log if it grows larger than 1 MB
-if [[ -f "$LOG_FILE" && $(wc -c <"$LOG_FILE") -gt 1048576 ]]; then
+if [[ -f "$LOG_FILE" && $(wc -c <"$LOG_FILE")" -gt 1048576 ]]; then
     mv "$LOG_FILE" "${LOG_FILE}-old.log"
 fi
 
@@ -65,14 +64,15 @@ EOF
 
 # parse command line arguments
 parse_args() {
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local cfg="$script_dir/launch-config.json"
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local config_file="$script_dir/launch-config.json"
     local dry=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
             -c|--config)
                 [[ $# -lt 2 ]] && { log ERROR "Missing value for $1"; usage; exit 2; }
-                cfg="$2"; shift 2 ;;
+                config_file="$2"; shift 2 ;;
             -d|--dry-run)
                 dry=1; shift ;;
             *)
@@ -81,7 +81,7 @@ parse_args() {
     done
 
     # output parsed vals to stdout for caller capture.
-    echo "$cfg $dry"
+    echo "$config_file $dry"
 }
 
 # check and validate config file
@@ -111,7 +111,7 @@ check_config_file() {
 
 # parse config file once and return all data
 parse_config() {
-    local cfg="$1"
+    local config_file="$1"
 
     # parse entire config at once using jq
     jq -r '{
@@ -119,7 +119,7 @@ parse_config() {
         apps: [.apps[]? // empty],
         plugins: [.plugins // {} | keys[]],
         layouts: .layouts
-    }' "$cfg" 2>/dev/null
+    }' "$config_file" 2>/dev/null
 }
 
 # validate URLs
@@ -216,7 +216,7 @@ open_apps() {
 
 # configure apps via plugins
 configure_apps() {
-    local plugins="$1" cfg="$2" dry="$3"
+    local plugins="$1" config_file="$2" dry="$3"
     log INFO "Configuring Applications..."
 
     if [[ -z "$plugins" || "$plugins" == "null" ]]; then
@@ -225,9 +225,10 @@ configure_apps() {
     fi
 
     # Export config path for plugins to use
-    export LAUNCH_BOX_CONFIG="$cfg"
+    export LAUNCH_BOX_CONFIG="$config_file"
 
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     while IFS= read -r plugin; do
         [[ -z "$plugin" ]] && continue
 
@@ -247,10 +248,11 @@ configure_apps() {
 
 # configure window layouts via Hammerspoon
 configure_layouts() {
-    local cfg="$1" dry="$2"
+    local config_file="$1" dry="$2"
     log INFO "Configuring Layouts..."
 
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     local layout_script="$script_dir/layout/layout.sh"
 
     # check if layout script exists
@@ -261,7 +263,8 @@ configure_layouts() {
 
     # symlink config for Hammerspoon to read
     if (( ! dry )); then
-        local config_json="$(cd "$(dirname "$cfg")" && pwd)/$(basename "$cfg")"
+        local config_json
+        config_json="$(cd "$(dirname "$config_file")" && pwd)/$(basename "$config_file")"
         local hs_config_link="$HOME/.hammerspoon/plugins/launch-box-config.json"
         mkdir -p "$(dirname "$hs_config_link")"
         ln -sf "$config_json" "$hs_config_link"
@@ -278,7 +281,7 @@ configure_layouts() {
 
 # main
 main() {
-    local cfg dry_run
+    local config_file dry_run
 
     # handle help before anything else
     for arg in "$@"; do
@@ -293,10 +296,10 @@ main() {
     # parse command line arguments
     local args
     args=$(parse_args "$@")
-    read -r cfg dry_run <<< "$args"
+    read -r config_file dry_run <<< "$args"
 
-    log INFO "Checking config file: '$cfg'..."
-    check_config_file "$cfg" || exit 1
+    log INFO "Checking config file: '$config_file'..."
+    check_config_file "$config_file" || exit 1
 
     log INFO "Checking core dependencies..."
     check_core_dependencies || exit 1
@@ -304,7 +307,7 @@ main() {
     # parse config once
     log INFO "Parsing config file..."
     local config_data
-    config_data=$(parse_config "$cfg") || exit 1
+    config_data=$(parse_config "$config_file") || exit 1
 
     # extract parsed data
     local urls apps plugins
@@ -320,10 +323,10 @@ main() {
     sleep 2 # wait for apps to launch
 
     # configure apps
-    configure_apps "$plugins" "$cfg" "$dry_run"
+    configure_apps "$plugins" "$config_file" "$dry_run"
 
     # configure layouts
-    configure_layouts "$cfg" "$dry_run"
+    configure_layouts "$config_file" "$dry_run"
 
     log INFO "Finished."
 }
