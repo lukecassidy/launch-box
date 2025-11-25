@@ -12,7 +12,7 @@ set -Eeuo pipefail
 LOG_FILE="$(dirname "${BASH_SOURCE[0]}")/launch-box.log"
 
 # rotate log if it grows larger than 1 MB
-if [[ -f "$LOG_FILE" && $(wc -c <"$LOG_FILE")" -gt 1048576 ]]; then
+if [[ -f "$LOG_FILE" && $(wc -c <"$LOG_FILE") -gt 1048576 ]]; then
     mv "$LOG_FILE" "${LOG_FILE}-old.log"
 fi
 
