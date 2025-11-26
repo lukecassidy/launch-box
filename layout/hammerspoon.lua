@@ -27,6 +27,9 @@ end
 
 -- Presets for window positions
 local rects = {
+    -- Full screen
+    full_screen  = hs.geometry.rect(0,   0,   1,   1),
+
     -- Halves
     lft_half_all = hs.geometry.rect(0,   0,   0.5, 1),
     rgt_half_all = hs.geometry.rect(0.5, 0,   0.5, 1),

@@ -45,13 +45,12 @@
         { "slot": "rgt_half_all", "app": "Spotify" }
       ],
       "LS27D60xU (1)": [
-        { "slot": "lft_half_all", "app": "code"          },
-        { "slot": "rgt_half_all", "app": "Google Chrome" }
+        { "slot": "full_screen", "app": "code" }
       ],
       "LS27D60xU (2)": [
-        { "slot": "lft_half_all", "app": "iTerm"   },
-        { "slot": "rgt_qrtr_top", "app": "ChatGPT" },
-        { "slot": "rgt_qrtr_bot", "app": "Notion"  }
+        { "slot": "lft_half_all", "app": "Google Chrome" },
+        { "slot": "rgt_qrtr_top", "app": "iTerm"         },
+        { "slot": "rgt_qrtr_bot", "app": "Notion"        }
       ]
     }
   }
