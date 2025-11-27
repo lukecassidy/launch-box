@@ -116,4 +116,4 @@ After granting access, try running the script again.
   - [ ] Spotify - play playlists
   - [ ] Slack - Navigate to channel, set status
   - [ ] Expand on VS Code to open projects
-
+  - [ ] iTerm profile setting
