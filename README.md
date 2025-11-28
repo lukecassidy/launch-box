@@ -89,10 +89,13 @@ You can run LaunchBox as a macOS app, run the shell script directly, or setup a 
 This gives LaunchBox its own identity for system permissions:
 
 ```bash
-./install-app.sh
+./install-app.sh         # Normal installation (copies files)
+./install-app.sh --dev   # Dev mode (symlinks files)
 ```
 
 Installs **LaunchBox.app** to `/Applications` with its own system permissions.
+
+**Dev mode:** Use `--dev` to symlink scripts instead of copying them. Changes to source files will be immediately reflected when running the app.
 
 ### Option 2: Run via Shell Script
 
@@ -136,9 +139,7 @@ This removes the app from `/Applications` and optionally removes your config at 
 ---
 
 ## TODO
-- [ ] Symlink option for development
 - [ ] Add app icon
-- [ ] Log rotation could include timestamp
 - [ ] Add dynamic pane creation for iTerm2
 - [ ] Add more elegant screen name handling
 - [ ] Support multiple Chrome profiles (e.g., work vs personal)
