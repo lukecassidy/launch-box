@@ -139,7 +139,6 @@ This removes the app from `/Applications` and optionally removes your config at 
 ---
 
 ## TODO
-- [ ] Add app icon
 - [ ] Add dynamic pane creation for iTerm2
 - [ ] Add more elegant screen name handling
 - [ ] Support multiple Chrome profiles (e.g., work vs personal)
