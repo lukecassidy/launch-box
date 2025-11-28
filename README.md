@@ -149,5 +149,4 @@ This removes the app from `/Applications` and optionally removes your config at 
   - [ ] Spotify - play playlists
   - [ ] Slack - Navigate to channel, set status
   - [ ] Expand on VS Code to open projects
-  - [ ] iTerm profile setting
 - [ ] Add multi config support for app install option

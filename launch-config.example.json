@@ -11,10 +11,11 @@
   ],
   "plugins": {
     "iTerm": {
+      "profile": "Default",
       "panes": [
-        "clear; figlet luke",
-        "clear; figlet is",
-        "clear; figlet cool"
+        { "command": "clear; figlet luke", "profile": "Default" },
+        { "command": "clear; figlet is" },
+        { "command": "clear; figlet cool", "profile": "Production" }
       ]
     }
   },
