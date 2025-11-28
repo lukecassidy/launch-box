@@ -123,9 +123,19 @@ After granting access, try running the script again.
 
 ---
 
+## Uninstallation
+
+To remove LaunchBox.app:
+
+```bash
+./uninstall-app.sh
+```
+
+This removes the app from `/Applications` and optionally removes your config at `~/.launch-box/`.
+
+---
+
 ## TODO
-- [ ] Add uninstall script
-- [ ] Add --config-path to print out path
 - [ ] Symlink option for development
 - [ ] Add app icon
 - [ ] Log rotation could include timestamp
