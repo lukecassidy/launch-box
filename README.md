@@ -80,21 +80,38 @@ Examples:
 
 ---
 
-## Run It Your Way
-You can run launch-box.sh manually, on startup, or add a menu bar shortcut. I like this last approach so I'll outline it here.
+## Installation
 
-### Make it Clickable
+You can run LaunchBox as a macOS app, run the shell script directly, or setup a menu bar shortcut. The app approach is recommended for easy permission management.
+
+### Option 1: Install as macOS App (Recommended)
+
+This gives LaunchBox its own identity for system permissions:
+
+```bash
+./install-app.sh
+```
+
+Installs **LaunchBox.app** to `/Applications` with its own system permissions.
+
+### Option 2: Run via Shell Script
+
+You can also run `launch-box.sh` directly from Terminal:
+
+```bash
+./launch-box.sh                   # Use the default config
+./launch-box.sh -c work.json      # Use a custom config file
+./launch-box.sh -d                # Dry run
+```
+
+### Option 3: Automator + Shortcuts
+
 1. Open Applications → Automator → New Document → Application
-2. "Run Shell Script".
-3. Add `"/Path/to/repo/launch-box/launch-box.sh" "$@"`
+2. Add "Run Shell Script" action
+3. Paste: `"/Path/to/launch-box/launch-box.sh" "$@"`
 4. Save as `Launch Box`
-
-### Add To Menu Bar
-5. Open Shortcuts → New Shortcut → Open App.
-6. Select `Launch Box`
-7. Click "i" icon & Turn on 'Pin in Menu Bar'.
-
-That's it. Now you've got a one click workspace launcher 🌯.
+5. Open Shortcuts → New Shortcut → Open App → Select `Launch Box`
+6. Click "i" icon & turn on 'Pin in Menu Bar'
 
 ---
 
@@ -107,13 +124,19 @@ After granting access, try running the script again.
 ---
 
 ## TODO
-- [ ] Dynamic Pane splitting and commands for iTerm2
-- [ ] Elegant screen name handling
-- [ ] Interactive screen layout selection
+- [ ] Add uninstall script
+- [ ] Add --config-path to print out path
+- [ ] Symlink option for development
+- [ ] Add app icon
+- [ ] Log rotation could include timestamp
+- [ ] Add dynamic pane creation for iTerm2
+- [ ] Add more elegant screen name handling
 - [ ] Support multiple Chrome profiles (e.g., work vs personal)
+- [ ] Code plugin bug when running from app
 - [ ] More plugins
   - [ ] Finder - Open recent files
   - [ ] Spotify - play playlists
   - [ ] Slack - Navigate to channel, set status
   - [ ] Expand on VS Code to open projects
   - [ ] iTerm profile setting
+- [ ] Add multi config support for app install option

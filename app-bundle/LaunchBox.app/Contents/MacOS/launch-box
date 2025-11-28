@@ -1,0 +1,24 @@
+#!/bin/bash
+
+###############################################################################
+# LaunchBox.app Wrapper
+#
+# This wrapper allows LaunchBox to run as a proper macOS application
+# with its own identity for system permissions (Accessibility, etc.)
+###############################################################################
+
+# get the resources dir in the app bundle
+BUNDLE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RESOURCES_DIR="${BUNDLE_DIR}/Resources"
+LAUNCH_BOX_SCRIPT="${RESOURCES_DIR}/launch-box.sh"
+
+if [[ ! -f "$LAUNCH_BOX_SCRIPT" ]]; then
+    osascript -e "display alert \"LaunchBox Error\" message \"Cannot find launch-box.sh at: $LAUNCH_BOX_SCRIPT\" as critical"
+    exit 1
+fi
+
+# set the working dir to resources so relative paths work
+cd "$RESOURCES_DIR"
+
+# execute the main launch-box script
+exec "$LAUNCH_BOX_SCRIPT" "$@"

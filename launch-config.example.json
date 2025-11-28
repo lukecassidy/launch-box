@@ -10,7 +10,6 @@
     "iTerm"
   ],
   "plugins": {
-    "code": {},
     "iTerm": {
       "panes": [
         "clear; figlet luke",

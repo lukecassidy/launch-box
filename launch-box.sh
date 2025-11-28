@@ -5,29 +5,33 @@ set -Eeuo pipefail
 # Description:
 #     This script reads a config file containing URLs, app names and plugins.
 #
-# Usage: ./eat.sh [options]
+# Usage: ./launch-box.sh [options]
 ###############################################################################
 
-# redirect all output to log file, while still printing to console
-LOG_FILE="$(dirname "${BASH_SOURCE[0]}")/launch-box.log"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LAUNCH_BOX_HOME="$HOME/.launch-box"
+LOG_FILE="$LAUNCH_BOX_HOME/launch-box.log"
+mkdir -p "$LAUNCH_BOX_HOME"
 
-# rotate log if it grows larger than 1 MB
 if [[ -f "$LOG_FILE" && $(wc -c <"$LOG_FILE") -gt 1048576 ]]; then
-    mv "$LOG_FILE" "${LOG_FILE}-old.log"
+    mv "$LOG_FILE" "${LOG_FILE}.old"
 fi
 
 exec > >(tee -a "$LOG_FILE") 2>&1
 
-source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
+source "$SCRIPT_DIR/lib/common.sh"
 
 usage() {
     cat >&2 <<EOF
 Usage: $(basename "$0") [options]
 
 Options:
-  -c, --config <file>   Path to config file (default: launch-config.json)
+  -c, --config <file>   Path to config file (default: ~/.launch-box/launch-config.json)
   -d, --dry-run         Print actions without opening anything
   -h, --help            Show this help and exit
+
+Config file: $LAUNCH_BOX_HOME/launch-config.json
+Log file:    $LAUNCH_BOX_HOME/launch-box.log
 
 Config file example:
   {
@@ -62,11 +66,24 @@ Config file example:
 EOF
 }
 
+# setup user config on first run
+setup_user_config() {
+    local user_config="$LAUNCH_BOX_HOME/launch-config.json"
+    local example_config="$SCRIPT_DIR/launch-config.example.json"
+
+    # if user config doesn't exist but example does, copy it
+    if [[ ! -f "$user_config" && -f "$example_config" ]]; then
+        log INFO "First run detected. Setting up user config..."
+        cp "$example_config" "$user_config"
+
+        log INFO "Config file created at: $user_config"
+        log INFO "You can customise this file for your setup."
+    fi
+}
+
 # parse command line arguments
 parse_args() {
-    local script_dir
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local config_file="$script_dir/launch-config.json"
+    local config_file="$LAUNCH_BOX_HOME/launch-config.json"
     local dry=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -80,7 +97,7 @@ parse_args() {
         esac
     done
 
-    # output parsed vals to stdout for caller capture.
+    # output parsed vals to stdout for caller capture
     echo "$config_file $dry"
 }
 
@@ -224,7 +241,7 @@ configure_apps() {
         return 0
     fi
 
-    # Export config path for plugins to use
+    # export config path for plugins to use
     export LAUNCH_BOX_CONFIG="$config_file"
 
     local script_dir
@@ -271,7 +288,7 @@ configure_layouts() {
         log INFO "Config linked for Hammerspoon: $config_json"
     fi
 
-    # Run layout script
+    # run layout script
     if (( dry )); then
         log INFO "Would run layout configuration"
     else
@@ -292,6 +309,9 @@ main() {
     done
 
     log INFO "Unpacking l(a)unch box."
+
+    # setup user config on first run
+    setup_user_config
 
     # parse command line arguments
     local args
