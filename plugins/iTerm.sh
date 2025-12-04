@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###############################################################################
-# iTerm config script to create panes and run commands
+# iTerm plugin script to dynamically create panes and run commands
 ###############################################################################
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
@@ -32,86 +32,77 @@ if [[ -z "${LAUNCH_BOX_CONFIG:-}" ]]; then
     exit_or_return 0
 fi
 
-# get iTerm configuration from config
+# get default profile and parse panes (expects object format)
 default_profile=$(jq -r '.plugins.iTerm.profile // "Default"' "$LAUNCH_BOX_CONFIG" 2>/dev/null)
-
-# check if panes is an array of strings or objects
-pane_type=$(jq -r '.plugins.iTerm.panes[0] | type' "$LAUNCH_BOX_CONFIG" 2>/dev/null)
-
-if [[ "$pane_type" == "object" ]]; then
-    # panes with profile per pane
-    pane_data=$(jq -r '.plugins.iTerm.panes[] | "\(.command // "clear")|\(.profile // "'"$default_profile"'")"' "$LAUNCH_BOX_CONFIG" 2>/dev/null)
-else
-    # simple string commands
-    pane_data=$(jq -r '.plugins.iTerm.panes[] | . + "|'"$default_profile"'"' "$LAUNCH_BOX_CONFIG" 2>/dev/null)
-fi
+pane_data=$(jq -r '.plugins.iTerm.panes[] | "\(.command // "clear")|\(.profile // "'"$default_profile"'")"' "$LAUNCH_BOX_CONFIG" 2>/dev/null)
 
 if [[ -z "$pane_data" ]]; then
     log WARNING "No iTerm pane commands defined in config, skipping"
     exit_or_return 0
 fi
 
-# read pane data into arrays
+# read pane data and export as env variables for AppleScript
 IFS=$'\n' read -d '' -r -a panes <<< "$pane_data" || true
+pane_count=${#panes[@]}
 
-# parse command and profile for each pane
-IFS='|' read -r cmd1 prof1 <<< "${panes[0]:-clear|$default_profile}"
-IFS='|' read -r cmd2 prof2 <<< "${panes[1]:-clear|$default_profile}"
-IFS='|' read -r cmd3 prof3 <<< "${panes[2]:-clear|$default_profile}"
+for i in "${!panes[@]}"; do
+    IFS='|' read -r cmd prof <<< "${panes[$i]}"
+    export "PANE${i}_COMMAND=${cmd:-clear}"
+    export "PANE${i}_PROFILE=${prof:-$default_profile}"
+done
 
-# export pane commands and profiles for AppleScript
-export PANE1_COMMAND="${cmd1:-clear}"
-export PANE1_PROFILE="${prof1:-$default_profile}"
-export PANE2_COMMAND="${cmd2:-clear}"
-export PANE2_PROFILE="${prof2:-$default_profile}"
-export PANE3_COMMAND="${cmd3:-clear}"
-export PANE3_PROFILE="${prof3:-$default_profile}"
+# build AppleScript dynamically based on pane count
+applescript='
+tell application "iTerm"
+    activate
 
-# create a three-pane workspace (top plus two lower panes) and run starter commands
-if ! osascript <<'EOF'; then
-    set pane1Command to system attribute "PANE1_COMMAND"
-    set pane1Profile to system attribute "PANE1_PROFILE"
-    set pane2Command to system attribute "PANE2_COMMAND"
-    set pane2Profile to system attribute "PANE2_PROFILE"
-    set pane3Command to system attribute "PANE3_COMMAND"
-    set pane3Profile to system attribute "PANE3_PROFILE"
-
-    tell application "iTerm"
-        activate
-
-        set targetWindow to missing value
-        set workingTab to missing value
-
-        try
-            set targetWindow to current window
-        end try
-
-        if targetWindow is missing value then
-            set targetWindow to (create window with profile pane1Profile)
-            set workingTab to current tab of targetWindow
-        else
-            tell targetWindow
-                set workingTab to (create tab with profile pane1Profile)
-            end tell
-        end if
-
+    try
+        set targetWindow to current window
         tell targetWindow
-            set pane1 to current session of workingTab
-            tell pane1
-                write text pane1Command
-                set pane2 to (split horizontally with profile pane2Profile)
-            end tell
-
-            tell pane2
-                write text pane2Command
-                set pane3 to (split vertically with profile pane3Profile)
-                tell pane3
-                    write text pane3Command
-                end tell
-            end tell
+            set workingTab to (create tab with profile (system attribute "PANE0_PROFILE"))
         end tell
+    on error
+        set targetWindow to (create window with profile (system attribute "PANE0_PROFILE"))
+        set workingTab to current tab of targetWindow
+    end try
+
+    tell targetWindow
+        set pane0 to current session of workingTab
+        tell pane0 to write text (system attribute "PANE0_COMMAND")
+'
+
+# generate 2 column grid layout
+# - create all rows first (horizontal splits)
+# - then add columns (vertical splits)
+num_rows=$(( (pane_count + 1) / 2 ))
+declare -a row_panes=(0)
+
+# step 1: create rows by splitting pane0 horizontally
+for ((row=1; row<num_rows; row++)); do
+    applescript+="
+        tell pane0 to set pane$((row * 2)) to (split horizontally with profile (system attribute \"PANE$((row * 2))_PROFILE\"))
+        tell pane$((row * 2)) to write text (system attribute \"PANE$((row * 2))_COMMAND\")
+"
+    row_panes+=($((row * 2)))
+done
+
+# step 2: split each row vertically to create right column
+for ((row=0; row<num_rows; row++)); do
+    if (( row * 2 + 1 < pane_count )); then
+        applescript+="
+        tell pane${row_panes[$row]} to set pane$((row * 2 + 1)) to (split vertically with profile (system attribute \"PANE$((row * 2 + 1))_PROFILE\"))
+        tell pane$((row * 2 + 1)) to write text (system attribute \"PANE$((row * 2 + 1))_COMMAND\")
+"
+    fi
+done
+
+applescript+='
     end tell
-EOF
+end tell
+'
+
+# run our generated AppleScript
+if ! osascript -e "$applescript"; then
     log ERROR "Failed to configure iTerm panes via AppleScript"
     exit_or_return 1
 fi
