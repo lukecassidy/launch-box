@@ -148,3 +148,27 @@ wait_for_process() {
     local app="$1" attempts="${2:-20}" delay="${3:-1}"
     wait_for_success "$attempts" "$delay" is_app_running "$app"
 }
+
+# ensure config is loaded - if LAUNCH_BOX_CONFIG is not set, find a default
+ensure_config_loaded() {
+    if [[ -n "${LAUNCH_BOX_CONFIG:-}" ]]; then
+        return 0
+    fi
+
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local project_root="$(dirname "$script_dir")"
+
+    # try to find a config file in common locations
+    if [[ -f "$project_root/launch-config.json" ]]; then
+        export LAUNCH_BOX_CONFIG="$project_root/launch-config.json"
+        log INFO "Using default config: $LAUNCH_BOX_CONFIG"
+        return 0
+    elif [[ -f "$HOME/.launch-box/launch-config.json" ]]; then
+        export LAUNCH_BOX_CONFIG="$HOME/.launch-box/launch-config.json"
+        log INFO "Using user config: $LAUNCH_BOX_CONFIG"
+        return 0
+    fi
+
+    log ERROR "Config file not found. Set LAUNCH_BOX_CONFIG or create launch-config.json in project root"
+    return 1
+}
