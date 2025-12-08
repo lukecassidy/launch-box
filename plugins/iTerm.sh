@@ -27,7 +27,15 @@ check_dependencies() {
 
 # get default profile from config
 get_default_profile() {
-    jq -r '.plugins.iTerm.profile // "Default"' "$LAUNCH_BOX_CONFIG" 2>/dev/null
+    local profile
+    profile=$(jq -r '.plugins.iTerm.profile // "Default"' "$LAUNCH_BOX_CONFIG" 2>/dev/null)
+
+    # fallback to "Default" if empty or null
+    if [[ -z "$profile" || "$profile" == "null" ]]; then
+        echo "Default"
+    else
+        echo "$profile"
+    fi
 }
 
 # parse pane configuration from config file
