@@ -15,8 +15,6 @@
 plugin_dir="$(dirname "${BASH_SOURCE[0]}")"
 source "$plugin_dir/../lib/common.sh"
 
-log INFO "Layout plugin running..."
-
 # constants
 HS_APP="Hammerspoon"
 HS_CLI="${HS_CLI:-/opt/homebrew/bin/hs}"
@@ -43,8 +41,6 @@ check_dependencies() {
     fi
 }
 
-check_dependencies
-
 # ensure Hammerspoon config symlink exists
 ensure_hammerspoon_config_linked() {
     local repo_cfg="$plugin_dir/hammerspoon.lua"
@@ -58,13 +54,6 @@ ensure_hammerspoon_config_linked() {
     fi
     return 0 # no change
 }
-
-# check if config changed (triggers Hammerspoon restart if needed)
-if ensure_hammerspoon_config_linked; then
-    config_changed=0
-else
-    config_changed=1
-fi
 
 # IPC readiness check function
 is_hs_ipc_ready() {
@@ -119,6 +108,21 @@ verify_ipc() {
         exit_or_return 1
     fi
 }
+
+###############################################################################
+# Main Eexecution
+###############################################################################
+
+log INFO "Layout plugin running..."
+
+check_dependencies
+
+# check if config changed (triggers Hammerspoon restart if needed)
+if ensure_hammerspoon_config_linked; then
+    config_changed=0
+else
+    config_changed=1
+fi
 
 # ensure Hammerspoon is running and IPC is available
 if ! is_app_running "$HS_APP"; then
