@@ -4,27 +4,28 @@
 # iTerm plugin script to dynamically create panes and run commands
 ###############################################################################
 
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+plugin_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$plugin_dir/../lib/common.sh"
 
-log INFO 'iTerm configuration script running...'
+# constants
+ITERM_APP="iTerm"
 
 # check dependencies and skip if missing
-if ! is_cmd_installed "osascript"; then
-    log ERROR "Skipping iTerm configuration: osascript not installed"
-    exit_or_return 0
-fi
+check_dependencies() {
+    local -a missing=()
+    is_cmd_installed "osascript" || missing+=("osascript")
+    is_cmd_installed "jq" || missing+=("jq")
+    is_app_installed "$ITERM_APP" || missing+=("$ITERM_APP app")
 
-# check if iTerm is installed
-if ! is_app_installed "iTerm"; then
-    log ERROR "Skipping iTerm configuration: iTerm not installed"
-    exit_or_return 0
-fi
+    if (( ${#missing[@]} )); then
+        log ERROR "Skipping iTerm configuration: missing dependencies: ${missing[*]}"
+        exit_or_return 0
+    fi
+}
 
-# check for jq
-if ! is_cmd_installed "jq"; then
-    log ERROR "Skipping iTerm configuration: jq not installed"
-    exit_or_return 0
-fi
+log INFO "iTerm configuration script running..."
+
+check_dependencies
 
 # ensure config is loaded
 # TODO: improve how this is done - then roll out to other plugins
