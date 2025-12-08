@@ -10,6 +10,7 @@
     "iTerm"
   ],
   "plugins": {
+    "code": {},
     "iTerm": {
       "profile": "Default",
       "panes": [

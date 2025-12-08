@@ -4,10 +4,11 @@
 # Merge all Visual Studio Code windows into a single window
 ###############################################################################
 
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+plugin_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$plugin_dir/../lib/common.sh"
+
 log INFO "Merging all Visual Studio Code 'mac' windows..."
 code_cmd="click menu item \"Merge All Windows\" of menu \"Window\" of menu bar 1"
-
 
 for proc_name in "Code" "Electron"; do
     wait_for_process "$proc_name" 5 1 && break

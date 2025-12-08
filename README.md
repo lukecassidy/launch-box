@@ -141,11 +141,9 @@ This removes the app from `/Applications` and optionally removes your config at 
 ## TODO
 - [ ] Add more elegant screen name handling
 - [ ] Support multiple Chrome profiles (e.g., work vs personal)
-- [ ] Code plugin bug when running from app
 - [ ] More plugins
   - [ ] Finder - Open recent files
   - [ ] Spotify - play playlists
   - [ ] Slack - Navigate to channel, set status
   - [ ] Expand on VS Code to open projects
 - [ ] Add multi config support for app install option
-- [ ] Ensure plugin scripts can ne run directly

@@ -134,7 +134,7 @@ apply_applescript() {
 check_dependencies
 
 # ensure config is loaded
-# TODO: improve how this is done - then roll out to other plugins
+# TODO: improve how this is done. should be consistent across plugins
 if ! ensure_config_loaded; then
     log ERROR "Skipping iTerm configuration: no config file available"
     exit_or_return 0
