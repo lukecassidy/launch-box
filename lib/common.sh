@@ -161,14 +161,14 @@ ensure_config_loaded() {
     # try to find a config file in common locations
     if [[ -f "$project_root/launch-config.json" ]]; then
         export LAUNCH_BOX_CONFIG="$project_root/launch-config.json"
-        log INFO "Using default config: $LAUNCH_BOX_CONFIG"
+        log INFO "Using project root config: $LAUNCH_BOX_CONFIG"
         return 0
     elif [[ -f "$HOME/.launch-box/launch-config.json" ]]; then
         export LAUNCH_BOX_CONFIG="$HOME/.launch-box/launch-config.json"
-        log INFO "Using user config: $LAUNCH_BOX_CONFIG"
+        log INFO "Using user home config: $LAUNCH_BOX_CONFIG"
         return 0
     fi
 
-    log ERROR "Config file not found. Set LAUNCH_BOX_CONFIG or create launch-config.json in project root"
+    log ERROR "Config file not found."
     return 1
 }

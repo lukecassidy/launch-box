@@ -26,9 +26,10 @@ if ! is_cmd_installed "jq"; then
     exit_or_return 0
 fi
 
-# check for config path
-if [[ -z "${LAUNCH_BOX_CONFIG:-}" ]]; then
-    log ERROR "Skipping iTerm configuration: config file path not provided"
+# ensure config is loaded
+# TODO: improve how this is done - then roll out to other plugins
+if ! ensure_config_loaded; then
+    log ERROR "Skipping iTerm configuration: no config file available"
     exit_or_return 0
 fi
 
