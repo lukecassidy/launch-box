@@ -46,14 +46,23 @@ check_dependencies() {
 check_dependencies
 
 # ensure Hammerspoon config symlink exists
-repo_cfg="$plugin_dir/hammerspoon.lua"
-target_cfg="$HOME/.hammerspoon/init.lua"
-config_changed=0
+ensure_hammerspoon_config_linked() {
+    local repo_cfg="$plugin_dir/hammerspoon.lua"
+    local target_cfg="$HOME/.hammerspoon/init.lua"
 
-if [[ "$(readlink "$target_cfg")" != "$(realpath "$repo_cfg")" ]]; then
-    log INFO "Linking Hammerspoon config → $target_cfg"
-    mkdir -p "$(dirname "$target_cfg")"
-    ln -sf "$(realpath "$repo_cfg")" "$target_cfg"
+    if [[ "$(readlink "$target_cfg")" != "$(realpath "$repo_cfg")" ]]; then
+        log INFO "Linking Hammerspoon config → $target_cfg"
+        mkdir -p "$(dirname "$target_cfg")"
+        ln -sf "$(realpath "$repo_cfg")" "$target_cfg"
+        return 1 # config changed
+    fi
+    return 0 # no change
+}
+
+# check if config changed (triggers Hammerspoon restart if needed)
+if ensure_hammerspoon_config_linked; then
+    config_changed=0
+else
     config_changed=1
 fi
 
