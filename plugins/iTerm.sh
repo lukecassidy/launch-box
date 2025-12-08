@@ -6,7 +6,10 @@
 
 plugin_dir="$(dirname "${BASH_SOURCE[0]}")"
 source "$plugin_dir/../lib/common.sh"
+
+# constants
 ITERM_APP="iTerm"
+MAX_PANES=10
 
 ###############################################################################
 # Helper Functions
@@ -97,6 +100,11 @@ fi
 
 # export pane data as env vars
 export_pane_vars "$pane_data" "$default_profile"
+
+# validate pane count
+if (( pane_count > MAX_PANES )); then
+    log WARNING "Pane count ($pane_count) exceeds recommended maximum ($MAX_PANES). Continuing anyway."
+fi
 
 # build AppleScript dynamically based on pane count
 applescript='
