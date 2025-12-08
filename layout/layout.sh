@@ -22,6 +22,16 @@ HS_APP="Hammerspoon"
 HS_CLI="${HS_CLI:-/opt/homebrew/bin/hs}"
 LUA_BIN="${LUA_BIN:-/opt/homebrew/bin/lua}"
 
+# timeout config
+IPC_STARTUP_ATTEMPTS=10        # attempts to wait for IPC after app starts
+IPC_STARTUP_DELAY=1            # seconds between IPC checks
+IPC_VERIFY_ATTEMPTS=5          # attempts to verify existing IPC connection
+IPC_VERIFY_DELAY=1             # seconds between verify checks
+SHUTDOWN_ATTEMPTS=5            # attempts to wait for clean shutdown
+SHUTDOWN_DELAY=0.2             # seconds between shutdown checks
+PROCESS_START_ATTEMPTS=10      # attempts to wait for process to start
+PROCESS_START_DELAY=1          # seconds between process checks
+
 # check dependencies and skip if missing
 check_dependencies() {
     local -a missing=()
@@ -62,7 +72,7 @@ is_hs_stopped() {
 # wait for IPC to become available with error handling
 wait_for_ipc() {
     log INFO "Waiting for Hammerspoon IPC to initialize..."
-    if ! wait_for_success 10 1 is_hs_ipc_ready; then
+    if ! wait_for_success "$IPC_STARTUP_ATTEMPTS" "$IPC_STARTUP_DELAY" is_hs_ipc_ready; then
         log ERROR "Hammerspoon IPC not available."
         exit_or_return 1
     fi
@@ -72,7 +82,7 @@ wait_for_ipc() {
 start_hammerspoon() {
     log INFO "Starting $HS_APP..."
     open -a "$HS_APP"
-    wait_for_process "$HS_APP" 10 1 || {
+    wait_for_process "$HS_APP" "$PROCESS_START_ATTEMPTS" "$PROCESS_START_DELAY" || {
         log ERROR "$HS_APP failed to launch."
         exit_or_return 1
     }
@@ -83,9 +93,9 @@ start_hammerspoon() {
 restart_hammerspoon() {
     log INFO "Restarting $HS_APP..."
     killall "$HS_APP" 2>/dev/null
-    wait_for_success 5 0.2 is_hs_stopped || log WARNING "$HS_APP may not have fully terminated"
+    wait_for_success "$SHUTDOWN_ATTEMPTS" "$SHUTDOWN_DELAY" is_hs_stopped || log WARNING "$HS_APP may not have fully terminated"
     open -a "$HS_APP"
-    wait_for_process "$HS_APP" 10 1 || {
+    wait_for_process "$HS_APP" "$PROCESS_START_ATTEMPTS" "$PROCESS_START_DELAY" || {
         log ERROR "$HS_APP failed to restart."
         exit_or_return 1
     }
@@ -95,7 +105,7 @@ restart_hammerspoon() {
 # verify IPC is available for already-running instance
 verify_ipc() {
     log INFO "Verifying Hammerspoon IPC..."
-    if ! wait_for_success 5 1 is_hs_ipc_ready; then
+    if ! wait_for_success "$IPC_VERIFY_ATTEMPTS" "$IPC_VERIFY_DELAY" is_hs_ipc_ready; then
         ipc_output="$("$HS_CLI" -c "return 'ok'" 2>&1)"
         log ERROR "Hammerspoon IPC not available."
         [[ -n "$ipc_output" ]] && log ERROR "Last IPC error: $ipc_output"
