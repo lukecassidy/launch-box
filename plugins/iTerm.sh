@@ -10,6 +10,7 @@ source "$plugin_dir/../lib/common.sh"
 # constants
 ITERM_APP="iTerm"
 MAX_PANES=10
+GRID_COLUMNS=2
 
 ###############################################################################
 # Helper Functions
@@ -133,27 +134,27 @@ tell application "iTerm"
         tell pane0 to write text (system attribute "PANE0_COMMAND")
 '
 
-# generate 2 column grid layout
+# generate grid layout based on GRID_COLUMNS
 # - create all rows first (horizontal splits)
 # - then add columns (vertical splits)
-num_rows=$(( (pane_count + 1) / 2 ))
+num_rows=$(( (pane_count + GRID_COLUMNS - 1) / GRID_COLUMNS ))
 declare -a row_panes=(0)
 
 # step 1: create rows by splitting pane0 horizontally
 for ((row=1; row<num_rows; row++)); do
     applescript+="
-        tell pane0 to set pane$((row * 2)) to (split horizontally with profile (system attribute \"PANE$((row * 2))_PROFILE\"))
-        tell pane$((row * 2)) to write text (system attribute \"PANE$((row * 2))_COMMAND\")
+        tell pane0 to set pane$((row * GRID_COLUMNS)) to (split horizontally with profile (system attribute \"PANE$((row * GRID_COLUMNS))_PROFILE\"))
+        tell pane$((row * GRID_COLUMNS)) to write text (system attribute \"PANE$((row * GRID_COLUMNS))_COMMAND\")
 "
-    row_panes+=($((row * 2)))
+    row_panes+=($((row * GRID_COLUMNS)))
 done
 
 # step 2: split each row vertically to create right column
 for ((row=0; row<num_rows; row++)); do
-    if (( row * 2 + 1 < pane_count )); then
+    if (( row * GRID_COLUMNS + 1 < pane_count )); then
         applescript+="
-        tell pane${row_panes[$row]} to set pane$((row * 2 + 1)) to (split vertically with profile (system attribute \"PANE$((row * 2 + 1))_PROFILE\"))
-        tell pane$((row * 2 + 1)) to write text (system attribute \"PANE$((row * 2 + 1))_COMMAND\")
+        tell pane${row_panes[$row]} to set pane$((row * GRID_COLUMNS + 1)) to (split vertically with profile (system attribute \"PANE$((row * GRID_COLUMNS + 1))_PROFILE\"))
+        tell pane$((row * GRID_COLUMNS + 1)) to write text (system attribute \"PANE$((row * GRID_COLUMNS + 1))_COMMAND\")
 "
     fi
 done
