@@ -81,8 +81,6 @@ apply_applescript() {
 # Main Execution
 ###############################################################################
 
-log INFO "iTerm configuration script running..."
-
 check_dependencies
 
 # ensure config is loaded
@@ -91,6 +89,8 @@ if ! ensure_config_loaded; then
     log ERROR "Skipping iTerm configuration: no config file available"
     exit_or_return 0
 fi
+
+log INFO "iTerm configuration script running..."
 
 # get default profile and parse panes (expects object format)
 default_profile=$(get_default_profile)
