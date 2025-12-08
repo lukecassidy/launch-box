@@ -108,3 +108,6 @@ if ! osascript -e "$applescript"; then
     log ERROR "Failed to configure iTerm panes via AppleScript"
     exit_or_return 1
 fi
+
+log INFO "iTerm configuration applied successfully."
+exit_or_return 0
