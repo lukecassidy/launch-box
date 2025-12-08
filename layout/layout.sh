@@ -29,6 +29,10 @@ SHUTDOWN_DELAY=0.2             # seconds between shutdown checks
 PROCESS_START_ATTEMPTS=10      # attempts to wait for process to start
 PROCESS_START_DELAY=1          # seconds between process checks
 
+###############################################################################
+# Helper Functions
+###############################################################################
+
 # check dependencies and skip if missing
 check_dependencies() {
     local -a missing=()
@@ -55,7 +59,7 @@ ensure_hammerspoon_config_linked() {
     return 0 # no change
 }
 
-# IPC readiness check function
+# IPC readiness check
 is_hs_ipc_ready() {
     "$HS_CLI" -c "return 'ok'" >/dev/null 2>&1
 }
@@ -110,7 +114,7 @@ verify_ipc() {
 }
 
 ###############################################################################
-# Main Eexecution
+# Main Execution
 ###############################################################################
 
 log INFO "Layout plugin running..."
@@ -142,3 +146,6 @@ if ! apply_output="$("$HS_CLI" -c "applyWorkspace()" 2>&1)"; then
     [[ -n "$apply_output" ]] && log ERROR "Hammerspoon output: $apply_output"
     exit_or_return 1
 fi
+
+log INFO "Layout applied successfully."
+exit_or_return 0
