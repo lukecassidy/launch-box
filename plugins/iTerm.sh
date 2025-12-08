@@ -6,9 +6,11 @@
 
 plugin_dir="$(dirname "${BASH_SOURCE[0]}")"
 source "$plugin_dir/../lib/common.sh"
-
-# constants
 ITERM_APP="iTerm"
+
+###############################################################################
+# Helper Functions
+###############################################################################
 
 # check dependencies and skip if missing
 check_dependencies() {
@@ -22,6 +24,21 @@ check_dependencies() {
         exit_or_return 0
     fi
 }
+
+
+# execute AppleScript
+apply_applescript() {
+    local applescript="$1"
+
+    if ! osascript -e "$applescript"; then
+        log ERROR "Failed to configure iTerm panes via AppleScript"
+        exit_or_return 1
+    fi
+}
+
+###############################################################################
+# Main Execution
+###############################################################################
 
 log INFO "iTerm configuration script running..."
 
@@ -103,11 +120,8 @@ applescript+='
 end tell
 '
 
-# run our generated AppleScript
-if ! osascript -e "$applescript"; then
-    log ERROR "Failed to configure iTerm panes via AppleScript"
-    exit_or_return 1
-fi
+# execute AppleScript
+apply_applescript "$applescript"
 
 log INFO "iTerm configuration applied successfully."
 exit_or_return 0
