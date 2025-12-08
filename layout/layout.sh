@@ -17,23 +17,25 @@ source "$plugin_dir/../lib/common.sh"
 
 log INFO "Layout plugin running..."
 
-# hammerspoon CLI location
+# constants
+HS_APP="Hammerspoon"
 HS_CLI="${HS_CLI:-/opt/homebrew/bin/hs}"
 LUA_BIN="${LUA_BIN:-/opt/homebrew/bin/lua}"
 
 # check dependencies and skip if missing
-if ! is_cmd_installed "$HS_CLI"; then
-    log ERROR "Skipping layout: hs CLI not found at $HS_CLI"
-    exit_or_return 0
-fi
-if ! is_cmd_installed "$LUA_BIN"; then
-    log ERROR "Skipping layout: lua not installed"
-    exit_or_return 0
-fi
-if ! is_app_installed Hammerspoon; then
-    log ERROR "Skipping layout: Hammerspoon not installed"
-    exit_or_return 0
-fi
+check_dependencies() {
+    local -a missing=()
+    is_cmd_installed "$HS_CLI" || missing+=("hs CLI at $HS_CLI")
+    is_cmd_installed "$LUA_BIN" || missing+=("lua")
+    is_app_installed "$HS_APP" || missing+=("$HS_APP app")
+
+    if (( ${#missing[@]} )); then
+        log ERROR "Skipping layout: missing dependencies: ${missing[*]}"
+        exit_or_return 0
+    fi
+}
+
+check_dependencies
 
 # ensure Hammerspoon config symlink exists
 repo_cfg="$plugin_dir/hammerspoon.lua"
@@ -47,42 +49,70 @@ if [[ "$(readlink "$target_cfg")" != "$(realpath "$repo_cfg")" ]]; then
     config_changed=1
 fi
 
-# ensure Hammerspoon is running and config is loaded
-if ! is_app_running "Hammerspoon"; then
-    log INFO "Starting Hammerspoon..."
-    open -a Hammerspoon
-    wait_for_process "Hammerspoon" 10 1 || {
-        log ERROR "Hammerspoon failed to launch."
-        exit_or_return 1
-    }
-    sleep 2
-elif (( config_changed )); then
-    # restart Hammerspoon if config changed to ensure IPC is loaded
-    log INFO "Config changed, restarting Hammerspoon..."
-    killall Hammerspoon 2>/dev/null
-    sleep 1
-    open -a Hammerspoon
-    wait_for_process "Hammerspoon" 10 1 || {
-        log ERROR "Hammerspoon failed to restart."
-        exit_or_return 1
-    }
-    sleep 2
-fi
-
-# wait for Hammerspoon IPC to become available
+# IPC readiness check function
 is_hs_ipc_ready() {
     "$HS_CLI" -c "return 'ok'" >/dev/null 2>&1
 }
 
-log INFO "Waiting for Hammerspoon IPC..."
-if wait_for_success 5 1 is_hs_ipc_ready; then
-    log INFO "Hammerspoon IPC ready."
+# check if app is NOT running (helper for waiting for shutdown)
+is_hs_stopped() {
+    ! is_app_running "$HS_APP"
+}
+
+# wait for IPC to become available with error handling
+wait_for_ipc() {
+    log INFO "Waiting for Hammerspoon IPC to initialize..."
+    if ! wait_for_success 10 1 is_hs_ipc_ready; then
+        log ERROR "Hammerspoon IPC not available."
+        exit_or_return 1
+    fi
+}
+
+# start Hammerspoon and wait for IPC
+start_hammerspoon() {
+    log INFO "Starting $HS_APP..."
+    open -a "$HS_APP"
+    wait_for_process "$HS_APP" 10 1 || {
+        log ERROR "$HS_APP failed to launch."
+        exit_or_return 1
+    }
+    wait_for_ipc
+}
+
+# restart Hammerspoon with clean shutdown
+restart_hammerspoon() {
+    log INFO "Restarting $HS_APP..."
+    killall "$HS_APP" 2>/dev/null
+    wait_for_success 5 0.2 is_hs_stopped || log WARNING "$HS_APP may not have fully terminated"
+    open -a "$HS_APP"
+    wait_for_process "$HS_APP" 10 1 || {
+        log ERROR "$HS_APP failed to restart."
+        exit_or_return 1
+    }
+    wait_for_ipc
+}
+
+# verify IPC is available for already-running instance
+verify_ipc() {
+    log INFO "Verifying Hammerspoon IPC..."
+    if ! wait_for_success 5 1 is_hs_ipc_ready; then
+        ipc_output="$("$HS_CLI" -c "return 'ok'" 2>&1)"
+        log ERROR "Hammerspoon IPC not available."
+        [[ -n "$ipc_output" ]] && log ERROR "Last IPC error: $ipc_output"
+        exit_or_return 1
+    fi
+}
+
+# ensure Hammerspoon is running and IPC is available
+if ! is_app_running "$HS_APP"; then
+    start_hammerspoon
+elif (( config_changed )); then
+    restart_hammerspoon
 else
-    ipc_output="$("$HS_CLI" -c "return 'ok'" 2>&1)"
-    log ERROR "Hammerspoon IPC not available after waiting."
-    [[ -n "$ipc_output" ]] && log ERROR "Last IPC error: $ipc_output"
-    exit_or_return 1
+    verify_ipc
 fi
+
+log INFO "Hammerspoon IPC ready."
 
 # apply layout
 log INFO "Applying window layout via Hammerspoon..."
