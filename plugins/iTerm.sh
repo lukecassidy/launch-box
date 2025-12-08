@@ -65,6 +65,56 @@ export_pane_vars() {
     done
 }
 
+# build complete AppleScript for iTerm pane layout
+#   - grid layout: left column (0,2,4...), right column (1,3,5...)
+#   - creates rows first (horizontal splits), then adds columns (vertical splits)
+build_applescript() {
+    local pane_count="$1"
+    local num_rows=$(( (pane_count + GRID_COLUMNS - 1) / GRID_COLUMNS ))
+
+    cat <<'EOF'
+tell application "iTerm"
+    activate
+
+    try
+        set targetWindow to current window
+        tell targetWindow
+            set workingTab to (create tab with profile (system attribute "PANE0_PROFILE"))
+        end tell
+    on error
+        set targetWindow to (create window with profile (system attribute "PANE0_PROFILE"))
+        set workingTab to current tab of targetWindow
+    end try
+
+    tell targetWindow
+        set pane0 to current session of workingTab
+        tell pane0 to write text (system attribute "PANE0_COMMAND")
+EOF
+
+    # horizontal splits: create left column (0,2,4...)
+    for ((row=1; row<num_rows; row++)); do
+        local pane_idx=$((row * GRID_COLUMNS))
+        printf '        tell pane0 to set pane%d to (split horizontally with profile (system attribute "PANE%d_PROFILE"))\n' "$pane_idx" "$pane_idx"
+        printf '        tell pane%d to write text (system attribute "PANE%d_COMMAND")\n' "$pane_idx" "$pane_idx"
+    done
+
+    # vertical splits: create right column (1,3,5...)
+    for ((row=0; row<num_rows; row++)); do
+        local left_pane=$((row * GRID_COLUMNS))
+        local right_pane=$((left_pane + 1))
+
+        if (( right_pane < pane_count )); then
+            printf '        tell pane%d to set pane%d to (split vertically with profile (system attribute "PANE%d_PROFILE"))\n' "$left_pane" "$right_pane" "$right_pane"
+            printf '        tell pane%d to write text (system attribute "PANE%d_COMMAND")\n' "$right_pane" "$right_pane"
+        fi
+    done
+
+    cat <<'EOF'
+    end tell
+end tell
+EOF
+}
+
 # execute AppleScript
 apply_applescript() {
     local applescript="$1"
@@ -92,8 +142,7 @@ fi
 
 log INFO "iTerm configuration script running..."
 
-# get default profile and parse panes
-# panes config format: array of objects with 'command' and 'profile' keys
+# get default profile and parse panes, [] of command profile keys
 default_profile=$(get_default_profile)
 pane_data=$(get_pane_data "$default_profile")
 
@@ -110,60 +159,8 @@ if (( pane_count > MAX_PANES )); then
     log WARNING "Pane count ($pane_count) exceeds recommended maximum ($MAX_PANES). Continuing anyway."
 fi
 
-# build AppleScript dynamically based on pane count
-applescript='
-tell application "iTerm"
-    activate
-
-    try
-        set targetWindow to current window
-        tell targetWindow
-            set workingTab to (create tab with profile (system attribute "PANE0_PROFILE"))
-        end tell
-    on error
-        set targetWindow to (create window with profile (system attribute "PANE0_PROFILE"))
-        set workingTab to current tab of targetWindow
-    end try
-
-    tell targetWindow
-        set pane0 to current session of workingTab
-        tell pane0 to write text (system attribute "PANE0_COMMAND")
-'
-
-# generate grid layout based on GRID_COLUMNS
-# pane numbering: left column is 0,2,4,... right column is 1,3,5,...
-# algorithm:
-#   1. create all rows first via horizontal splits (creates left column: panes 0,2,4,...)
-#   2. split each row vertically to add right column (creates panes 1,3,5,...)
-# this approach ensures even vertical distribution before adding columns
-num_rows=$(( (pane_count + GRID_COLUMNS - 1) / GRID_COLUMNS ))
-declare -a row_panes=(0)  # track left-column pane indices for vertical splits
-
-# step 1: create rows by splitting pane0 horizontally (left column)
-for ((row=1; row<num_rows; row++)); do
-    applescript+="
-        tell pane0 to set pane$((row * GRID_COLUMNS)) to (split horizontally with profile (system attribute \"PANE$((row * GRID_COLUMNS))_PROFILE\"))
-        tell pane$((row * GRID_COLUMNS)) to write text (system attribute \"PANE$((row * GRID_COLUMNS))_COMMAND\")
-"
-    row_panes+=($((row * GRID_COLUMNS)))
-done
-
-# step 2: split each row vertically to create right column (odd numbered panes)
-for ((row=0; row<num_rows; row++)); do
-    if (( row * GRID_COLUMNS + 1 < pane_count )); then
-        applescript+="
-        tell pane${row_panes[$row]} to set pane$((row * GRID_COLUMNS + 1)) to (split vertically with profile (system attribute \"PANE$((row * GRID_COLUMNS + 1))_PROFILE\"))
-        tell pane$((row * GRID_COLUMNS + 1)) to write text (system attribute \"PANE$((row * GRID_COLUMNS + 1))_COMMAND\")
-"
-    fi
-done
-
-applescript+='
-    end tell
-end tell
-'
-
-# execute AppleScript
+# build and execute AppleScript
+applescript=$(build_applescript "$pane_count")
 apply_applescript "$applescript"
 
 log INFO "iTerm configuration applied successfully."
