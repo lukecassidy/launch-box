@@ -36,6 +36,23 @@ get_pane_data() {
     jq -r '.plugins.iTerm.panes[] | "\(.command // "clear")|\(.profile // "'"$default_profile"'")"' "$LAUNCH_BOX_CONFIG" 2>/dev/null
 }
 
+# export pane data as env vars for AppleScript
+export_pane_vars() {
+    local pane_data="$1"
+    local default_profile="$2"
+
+    IFS=$'\n' read -d '' -r -a panes <<< "$pane_data" || true
+
+    # set global pane count
+    pane_count=${#panes[@]}
+
+    for i in "${!panes[@]}"; do
+        IFS='|' read -r cmd prof <<< "${panes[$i]}"
+        export "PANE${i}_COMMAND=${cmd:-clear}"
+        export "PANE${i}_PROFILE=${prof:-$default_profile}"
+    done
+}
+
 # execute AppleScript
 apply_applescript() {
     local applescript="$1"
@@ -70,15 +87,8 @@ if [[ -z "$pane_data" ]]; then
     exit_or_return 0
 fi
 
-# read pane data and export as env variables for AppleScript
-IFS=$'\n' read -d '' -r -a panes <<< "$pane_data" || true
-pane_count=${#panes[@]}
-
-for i in "${!panes[@]}"; do
-    IFS='|' read -r cmd prof <<< "${panes[$i]}"
-    export "PANE${i}_COMMAND=${cmd:-clear}"
-    export "PANE${i}_PROFILE=${prof:-$default_profile}"
-done
+# export pane data as env vars
+export_pane_vars "$pane_data" "$default_profile"
 
 # build AppleScript dynamically based on pane count
 applescript='
