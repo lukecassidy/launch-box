@@ -20,7 +20,6 @@ log INFO "Layout plugin running..."
 # constants
 HS_APP="Hammerspoon"
 HS_CLI="${HS_CLI:-/opt/homebrew/bin/hs}"
-LUA_BIN="${LUA_BIN:-/opt/homebrew/bin/lua}"
 
 # timeout config
 IPC_STARTUP_ATTEMPTS=10        # attempts to wait for IPC after app starts
@@ -36,7 +35,6 @@ PROCESS_START_DELAY=1          # seconds between process checks
 check_dependencies() {
     local -a missing=()
     is_cmd_installed "$HS_CLI" || missing+=("hs CLI at $HS_CLI")
-    is_cmd_installed "$LUA_BIN" || missing+=("lua")
     is_app_installed "$HS_APP" || missing+=("$HS_APP app")
 
     if (( ${#missing[@]} )); then
