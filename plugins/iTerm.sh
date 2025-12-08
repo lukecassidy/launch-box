@@ -55,7 +55,7 @@ export_pane_vars() {
 
     IFS=$'\n' read -d '' -r -a panes <<< "$pane_data" || true
 
-    # set global pane count
+    # set global pane count (intentionally not local - used by caller)
     pane_count=${#panes[@]}
 
     for i in "${!panes[@]}"; do
@@ -92,7 +92,8 @@ fi
 
 log INFO "iTerm configuration script running..."
 
-# get default profile and parse panes (expects object format)
+# get default profile and parse panes
+# panes config format: array of objects with 'command' and 'profile' keys
 default_profile=$(get_default_profile)
 pane_data=$(get_pane_data "$default_profile")
 
@@ -105,11 +106,6 @@ fi
 export_pane_vars "$pane_data" "$default_profile"
 
 # validate pane count
-if (( pane_count == 0 )); then
-    log ERROR "No valid panes to configure"
-    exit_or_return 1
-fi
-
 if (( pane_count > MAX_PANES )); then
     log WARNING "Pane count ($pane_count) exceeds recommended maximum ($MAX_PANES). Continuing anyway."
 fi
@@ -135,12 +131,15 @@ tell application "iTerm"
 '
 
 # generate grid layout based on GRID_COLUMNS
-# - create all rows first (horizontal splits)
-# - then add columns (vertical splits)
+# pane numbering: left column is 0,2,4,... right column is 1,3,5,...
+# algorithm:
+#   1. create all rows first via horizontal splits (creates left column: panes 0,2,4,...)
+#   2. split each row vertically to add right column (creates panes 1,3,5,...)
+# this approach ensures even vertical distribution before adding columns
 num_rows=$(( (pane_count + GRID_COLUMNS - 1) / GRID_COLUMNS ))
-declare -a row_panes=(0)
+declare -a row_panes=(0)  # track left-column pane indices for vertical splits
 
-# step 1: create rows by splitting pane0 horizontally
+# step 1: create rows by splitting pane0 horizontally (left column)
 for ((row=1; row<num_rows; row++)); do
     applescript+="
         tell pane0 to set pane$((row * GRID_COLUMNS)) to (split horizontally with profile (system attribute \"PANE$((row * GRID_COLUMNS))_PROFILE\"))
@@ -149,7 +148,7 @@ for ((row=1; row<num_rows; row++)); do
     row_panes+=($((row * GRID_COLUMNS)))
 done
 
-# step 2: split each row vertically to create right column
+# step 2: split each row vertically to create right column (odd numbered panes)
 for ((row=0; row<num_rows; row++)); do
     if (( row * GRID_COLUMNS + 1 < pane_count )); then
         applescript+="
