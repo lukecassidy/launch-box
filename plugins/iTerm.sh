@@ -67,9 +67,11 @@ export_pane_vars() {
 # execute AppleScript
 apply_applescript() {
     local applescript="$1"
+    local output
 
-    if ! osascript -e "$applescript"; then
+    if ! output=$(osascript -e "$applescript" 2>&1); then
         log ERROR "Failed to configure iTerm panes via AppleScript"
+        [[ -n "$output" ]] && log ERROR "AppleScript output: $output"
         exit_or_return 1
     fi
 }
@@ -102,6 +104,11 @@ fi
 export_pane_vars "$pane_data" "$default_profile"
 
 # validate pane count
+if (( pane_count == 0 )); then
+    log ERROR "No valid panes to configure"
+    exit_or_return 1
+fi
+
 if (( pane_count > MAX_PANES )); then
     log WARNING "Pane count ($pane_count) exceeds recommended maximum ($MAX_PANES). Continuing anyway."
 fi
