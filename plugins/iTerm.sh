@@ -25,6 +25,10 @@ check_dependencies() {
     fi
 }
 
+# get default profile from config
+get_default_profile() {
+    jq -r '.plugins.iTerm.profile // "Default"' "$LAUNCH_BOX_CONFIG" 2>/dev/null
+}
 
 # execute AppleScript
 apply_applescript() {
@@ -52,7 +56,7 @@ if ! ensure_config_loaded; then
 fi
 
 # get default profile and parse panes (expects object format)
-default_profile=$(jq -r '.plugins.iTerm.profile // "Default"' "$LAUNCH_BOX_CONFIG" 2>/dev/null)
+default_profile=$(get_default_profile)
 pane_data=$(jq -r '.plugins.iTerm.panes[] | "\(.command // "clear")|\(.profile // "'"$default_profile"'")"' "$LAUNCH_BOX_CONFIG" 2>/dev/null)
 
 if [[ -z "$pane_data" ]]; then
