@@ -30,6 +30,8 @@ check_dependencies() {
     code_cli=$(echo "$CODE_APP" | tr '[:upper:]' '[:lower:]')  # lowercase to "code"
 
     is_cmd_installed "$code_cli" || missing+=("code CLI")
+    is_cmd_installed "jq" || missing+=("jq")
+    is_cmd_installed "osascript" || missing+=("osascript")
 
     if (( ${#missing[@]} )); then
         log ERROR "Skipping VS Code configuration: missing dependencies: ${missing[*]}"
