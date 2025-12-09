@@ -10,7 +10,12 @@
     "iTerm"
   ],
   "plugins": {
-    "code": {},
+    "code": {
+      "projects": [
+        "~/dev/launch-box",
+        "~/dev/other-project"
+      ]
+    },
     "iTerm": {
       "profile": "Default",
       "panes": [
