@@ -10,13 +10,26 @@ plugin_dir="$(dirname "${BASH_SOURCE[0]}")"
 source "$plugin_dir/../lib/common.sh"
 
 ###############################################################################
+# Constants
+###############################################################################
+
+CODE_APP="Code"
+CODE_ALT_APP="Electron"
+PROCESS_WAIT_TIMEOUT=5
+PROCESS_WAIT_INTERVAL=1
+MERGE_DELAY=0.3
+
+###############################################################################
 # Helper Functions
 ###############################################################################
 
 # check dependencies and skip if missing
 check_dependencies() {
     local -a missing=()
-    is_cmd_installed "code" || missing+=("code CLI")
+    local code_cli
+    code_cli=$(echo "$CODE_APP" | tr '[:upper:]' '[:lower:]')  # lowercase to "code"
+
+    is_cmd_installed "$code_cli" || missing+=("code CLI")
 
     if (( ${#missing[@]} )); then
         log ERROR "Skipping VS Code configuration: missing dependencies: ${missing[*]}"
@@ -26,7 +39,7 @@ check_dependencies() {
 
 # open projects from config
 open_projects() {
-    local projects first_project
+    local projects
     projects=$(jq -r '.plugins.code.projects[]?' "$LAUNCH_BOX_CONFIG" 2>/dev/null)
 
     if [[ -z "$projects" ]]; then
@@ -46,17 +59,14 @@ open_projects() {
             continue
         fi
 
-        # remember first valid project
-        if [[ -z "$first_project" ]]; then
-            first_project="$project"
+        # remember first valid project (intentionally global)
+        if [[ -z "$FIRST_PROJECT" ]]; then
+            FIRST_PROJECT="$project"
         fi
 
         log INFO "Opening project: $project"
         code "$project" </dev/null
     done <<< "$projects"
-
-    # return first valid project path for focusing
-    echo "$first_project"
 }
 
 # merge all windows into a single window
@@ -67,8 +77,8 @@ merge_windows() {
     log INFO "Merging all VS Code windows..."
 
     # wait for VS Code process to be running
-    for proc_name in "Code" "Electron"; do
-        wait_for_process "$proc_name" 5 1 && break
+    for proc_name in "$CODE_APP" "$CODE_ALT_APP"; do
+        wait_for_process "$proc_name" "$PROCESS_WAIT_TIMEOUT" "$PROCESS_WAIT_INTERVAL" && break
     done || {
         log ERROR "Visual Studio Code process not found."
         exit_or_return 1
@@ -79,7 +89,7 @@ merge_windows() {
 tell application "System Events"
     tell process "$proc_name"
         set frontmost to true
-        delay 0.3
+        delay $MERGE_DELAY
         $code_cmd
     end tell
 end tell
@@ -105,15 +115,15 @@ if ! ensure_config_loaded; then
 fi
 
 # open projects if configured
-first_project=$(open_projects)
+open_projects
 
 # merge all vscode windows
 merge_windows
 
 # focus on first project if available
-if [[ -n "$first_project" ]]; then
+if [[ -n "$FIRST_PROJECT" ]]; then
     log INFO "Focusing on first project..."
-    code "$first_project" </dev/null
+    code "$FIRST_PROJECT" </dev/null
 fi
 
 log INFO "VS Code configuration completed."
