@@ -17,6 +17,7 @@ CODE_APP="Code"
 CODE_ALT_APP="Electron"
 PROCESS_WAIT_TIMEOUT=5
 PROCESS_WAIT_INTERVAL=1
+PROJECTS_OPEN_DELAY=1
 MERGE_DELAY=0.3
 
 ###############################################################################
@@ -68,6 +69,9 @@ open_projects() {
 
         log INFO "Opening project: $project"
         code "$project" </dev/null
+
+        # small delay to ensure project opens before next one
+        sleep "$PROJECTS_OPEN_DELAY"
     done <<< "$projects"
 }
 
