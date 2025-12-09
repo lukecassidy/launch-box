@@ -119,8 +119,13 @@ fi
 # open projects if configured
 open_projects
 
-# merge all vscode windows
-merge_windows
+# merge all vscode windows if enabled
+merge_enabled=$(jq -r 'if .plugins.code.merge_windows == null then true else .plugins.code.merge_windows end' "$LAUNCH_BOX_CONFIG" 2>/dev/null)
+if [[ "$merge_enabled" == "true" ]]; then
+    merge_windows
+else
+    log INFO "Window merging disabled in config"
+fi
 
 # focus on first project if available
 if [[ -n "$FIRST_PROJECT" ]]; then

@@ -14,7 +14,8 @@
       "projects": [
         "~/dev/launch-box",
         "~/dev/other-project"
-      ]
+      ],
+      "merge_windows": true
     },
     "iTerm": {
       "profile": "Default",
