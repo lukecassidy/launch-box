@@ -145,5 +145,4 @@ This removes the app from `/Applications` and optionally removes your config at 
   - [ ] Finder - Open recent files
   - [ ] Spotify - play playlists
   - [ ] Slack - Navigate to channel, set status
-  - [ ] Expand on VS Code to open projects
 - [ ] Add multi config support for app install option
