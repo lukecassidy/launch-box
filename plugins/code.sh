@@ -47,7 +47,7 @@ open_projects() {
         fi
 
         # remember first valid project (intentionally global)
-        if [[ -z "$FIRST_PROJECT" ]]; then
+        if [[ -z "${FIRST_PROJECT:-}" ]]; then
             FIRST_PROJECT="$project"
         fi
 
@@ -117,7 +117,7 @@ else
 fi
 
 # focus on first project if available
-if [[ -n "$FIRST_PROJECT" ]]; then
+if [[ -n "${FIRST_PROJECT:-}" ]]; then
     log INFO "Focusing on first project..."
     code "$FIRST_PROJECT" </dev/null
 fi

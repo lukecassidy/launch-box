@@ -210,6 +210,9 @@ open_apps() {
         return 0
     fi
 
+    # track which apps we actually launched
+    LAUNCHED_APPS=()
+
     while IFS= read -r app; do
         [[ -z "$app" ]] && continue
 
@@ -224,6 +227,7 @@ open_apps() {
                 : # no-op (dry run)
             else
                 open -a "$app"
+                LAUNCHED_APPS+=("$app")
             fi
         else
             log WARNING "Application not found - '$app'"
@@ -340,7 +344,11 @@ main() {
 
     # open apps
     open_apps "$apps" "$dry_run"
-    sleep 2 # wait for apps to launch
+
+    # wait for apps to launch
+    if (( ${#LAUNCHED_APPS[@]} > 0 )) && ! (( dry_run )); then
+        sleep 1
+    fi
 
     # configure apps
     configure_apps "$plugins" "$config_file" "$dry_run"
