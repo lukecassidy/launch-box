@@ -16,19 +16,6 @@ GRID_COLUMNS=2
 # Helper Functions
 ###############################################################################
 
-# check dependencies and skip if missing
-check_dependencies() {
-    local -a missing=()
-    is_cmd_installed "osascript" || missing+=("osascript")
-    is_cmd_installed "jq" || missing+=("jq")
-    is_app_installed "$ITERM_APP" || missing+=("$ITERM_APP app")
-
-    if (( ${#missing[@]} )); then
-        log ERROR "Skipping iTerm configuration: missing dependencies: ${missing[*]}"
-        exit_or_return 0
-    fi
-}
-
 # get default profile from config
 get_default_profile() {
     local profile
@@ -131,7 +118,7 @@ apply_applescript() {
 # Main Execution
 ###############################################################################
 
-check_dependencies
+check_plugin_dependencies "iTerm configuration" "cmd:osascript" "cmd:jq" "app:$ITERM_APP"
 
 # ensure config is loaded
 # TODO: improve how this is done. should be consistent across plugins

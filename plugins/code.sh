@@ -24,22 +24,6 @@ MERGE_DELAY=0.3
 # Helper Functions
 ###############################################################################
 
-# check dependencies and skip if missing
-check_dependencies() {
-    local -a missing=()
-    local code_cli
-    code_cli=$(echo "$CODE_APP" | tr '[:upper:]' '[:lower:]')  # lowercase to "code"
-
-    is_cmd_installed "$code_cli" || missing+=("code CLI")
-    is_cmd_installed "jq" || missing+=("jq")
-    is_cmd_installed "osascript" || missing+=("osascript")
-
-    if (( ${#missing[@]} )); then
-        log ERROR "Skipping VS Code configuration: missing dependencies: ${missing[*]}"
-        exit_or_return 0
-    fi
-}
-
 # open projects from config
 open_projects() {
     local projects
@@ -112,7 +96,8 @@ EOF
 # Main Execution
 ###############################################################################
 
-check_dependencies
+code_cli=$(echo "$CODE_APP" | tr '[:upper:]' '[:lower:]')  # lowercase to "code"
+check_plugin_dependencies "VS Code configuration" "cmd:$code_cli" "cmd:jq" "cmd:osascript"
 
 # ensure config is loaded
 if ! ensure_config_loaded; then

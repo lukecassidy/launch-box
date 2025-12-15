@@ -127,6 +127,38 @@ is_cmd_installed() {
     fi
 }
 
+# usage: check_plugin_dependencies "plugin-name" "cmd:jq" "cmd:osascript" "app:iTerm"
+    # cmd: checks for CLI commands (via 'command -v')
+    # app: checks for macOS apps (via 'open -Ra')
+check_plugin_dependencies() {
+    local plugin_name="$1"
+    shift
+    local -a missing=()
+    local dep dep_name
+
+    for dep in "$@"; do
+        dep_name="${dep#*:}"
+
+        case "$dep" in
+            cmd:*)
+                is_cmd_installed "$dep_name" || missing+=("$dep_name")
+                ;;
+            app:*)
+                is_app_installed "$dep_name" || missing+=("$dep_name app")
+                ;;
+            *)
+                log WARNING "Unknown dependency type for '$dep', assuming command"
+                is_cmd_installed "$dep" || missing+=("$dep")
+                ;;
+        esac
+    done
+
+    if (( ${#missing[@]} )); then
+        log ERROR "Skipping $plugin_name: missing dependencies: ${missing[*]}"
+        exit_or_return 0
+    fi
+}
+
 # retry command until success or attempts exhausted
 wait_for_success() {
     local attempts="$1" delay="$2"

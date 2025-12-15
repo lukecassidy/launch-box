@@ -33,18 +33,6 @@ PROCESS_START_DELAY=1          # seconds between process checks
 # Helper Functions
 ###############################################################################
 
-# check dependencies and skip if missing
-check_dependencies() {
-    local -a missing=()
-    is_cmd_installed "$HS_CLI" || missing+=("hs CLI at $HS_CLI")
-    is_app_installed "$HS_APP" || missing+=("$HS_APP app")
-
-    if (( ${#missing[@]} )); then
-        log ERROR "Skipping layout: missing dependencies: ${missing[*]}"
-        exit_or_return 0
-    fi
-}
-
 # ensure Hammerspoon config symlink exists
 ensure_hammerspoon_config_linked() {
     local repo_cfg="$plugin_dir/hammerspoon.lua"
@@ -119,7 +107,7 @@ verify_ipc() {
 
 log INFO "Layout plugin running..."
 
-check_dependencies
+check_plugin_dependencies "layout" "cmd:$HS_CLI" "app:$HS_APP"
 
 # check if config changed (triggers Hammerspoon restart if needed)
 if ensure_hammerspoon_config_linked; then
