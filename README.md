@@ -126,6 +126,57 @@ After granting access, try running the script again.
 
 ---
 
+## Architecture
+
+```mermaid
+graph LR
+    Start([launch-box.sh]) --> Init[Initialize & Validate]
+    Init --> Phase1[1. Open URLs]
+    Phase1 --> Phase2[2. Launch Apps]
+    Phase2 --> Phase3[3. Run Plugins]
+    Phase3 --> Phase4[4. Apply Layouts]
+    Phase4 --> Complete([Done])
+
+    Config[(Config<br/>JSON)] -.-> Init
+    Config -.-> Phase1
+    Config -.-> Phase2
+    Config -.-> Phase3
+    Config -.-> Phase4
+
+    Phase3 -.-> Plugins[plugins/<br/>code.sh<br/>iTerm.sh]
+    Phase4 -.-> Layout[layout/<br/>Hammerspoon]
+
+    Common[lib/common.sh<br/>shared utilities] -.-> Init
+    Common -.-> Phase1
+    Common -.-> Phase2
+    Common -.-> Plugins
+    Common -.-> Layout
+
+    style Start fill:#e1f5ff
+    style Complete fill:#e1f5ff
+    style Config fill:#fff4e1
+    style Common fill:#f0f0f0
+    style Phase1 fill:#e8f5e9
+    style Phase2 fill:#e8f5e9
+    style Phase3 fill:#e8f5e9
+    style Phase4 fill:#e8f5e9
+```
+
+**4-Phase Execution:**
+1. **Open URLs** - Browser tabs from config
+2. **Launch Apps** - macOS applications
+3. **Run Plugins** - Extensible app-specific configuration
+4. **Apply Layouts** - Window positioning via Hammerspoon
+
+**Key Components:**
+- **launch-box.sh**: Main orchestrator
+- **Config JSON**: Single file drives all behavior (urls, apps, plugins, layouts)
+- **lib/common.sh**: Shared utilities (logging, validation, process management)
+- **plugins/**: Extensible system (code.sh for VS Code, iTerm.sh for terminal panes)
+- **layout/**: Hammerspoon integration for window management
+
+---
+
 ## Uninstallation
 
 To remove LaunchBox.app:
@@ -146,3 +197,4 @@ This removes the app from `/Applications` and optionally removes your config at 
   - [ ] Spotify - play playlists
   - [ ] Slack - Navigate to channel, set status
 - [ ] Add multi config support for app install option
+- [ ] Dry-run mode for plugins
