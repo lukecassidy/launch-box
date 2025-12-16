@@ -12,8 +12,8 @@
 #           System Preferences > Security & Privacy > Privacy > Accessibility
 ###############################################################################
 
-plugin_dir="$(dirname "${BASH_SOURCE[0]}")"
-source "$plugin_dir/../lib/common.sh"
+script_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$script_dir/../lib/common.sh"
 
 # constants
 HS_APP="Hammerspoon"
@@ -35,7 +35,7 @@ PROCESS_START_DELAY=1          # seconds between process checks
 
 # ensure Hammerspoon config symlink exists
 ensure_hammerspoon_config_linked() {
-    local repo_cfg="$plugin_dir/hammerspoon.lua"
+    local repo_cfg="$script_dir/hammerspoon.lua"
     local target_cfg="$HOME/.hammerspoon/init.lua"
 
     if [[ "$(readlink "$target_cfg")" != "$(realpath "$repo_cfg")" ]]; then
@@ -135,5 +135,5 @@ if ! apply_output="$("$HS_CLI" -c "applyWorkspace()" 2>&1)"; then
     exit_or_return 1
 fi
 
-log INFO "Layout applied successfully."
+log INFO "Layout configuration completed successfully."
 exit_or_return 0

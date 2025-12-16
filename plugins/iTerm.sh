@@ -4,8 +4,8 @@
 # iTerm plugin script to dynamically create panes and run commands
 ###############################################################################
 
-plugin_dir="$(dirname "${BASH_SOURCE[0]}")"
-source "$plugin_dir/../lib/common.sh"
+script_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$script_dir/../lib/common.sh"
 
 # constants
 ITERM_APP="iTerm"
@@ -121,13 +121,12 @@ apply_applescript() {
 check_plugin_dependencies "iTerm configuration" "cmd:osascript" "cmd:jq" "app:$ITERM_APP"
 
 # ensure config is loaded
-# TODO: improve how this is done. should be consistent across plugins
 if ! ensure_config_loaded; then
-    log ERROR "Skipping iTerm configuration: no config file available"
+    log WARNING "No config file available, skipping iTerm configuration"
     exit_or_return 0
 fi
 
-log INFO "iTerm configuration script running..."
+log INFO "iTerm plugin running..."
 
 # get default profile and parse panes, [] of command profile keys
 default_profile=$(get_default_profile)
@@ -150,5 +149,5 @@ fi
 applescript=$(build_applescript "$pane_count")
 apply_applescript "$applescript"
 
-log INFO "iTerm configuration applied successfully."
+log INFO "iTerm configuration completed successfully."
 exit_or_return 0

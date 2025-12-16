@@ -6,11 +6,11 @@
 #   - Merges all windows into a single window
 ###############################################################################
 
-plugin_dir="$(dirname "${BASH_SOURCE[0]}")"
-source "$plugin_dir/../lib/common.sh"
+script_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$script_dir/../lib/common.sh"
 
 ###############################################################################
-# Constants
+# constants
 ###############################################################################
 
 CODE_APP="Code"
@@ -105,6 +105,8 @@ if ! ensure_config_loaded; then
     exit_or_return 0
 fi
 
+log INFO "VS Code plugin running..."
+
 # open projects if configured
 open_projects
 
@@ -122,5 +124,5 @@ if [[ -n "${FIRST_PROJECT:-}" ]]; then
     code "$FIRST_PROJECT" </dev/null
 fi
 
-log INFO "VS Code configuration completed."
+log INFO "VS Code configuration completed successfully."
 exit_or_return 0
