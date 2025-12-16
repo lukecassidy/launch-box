@@ -40,11 +40,7 @@ exit_or_return() {
 
 # is app installed
 is_app_installed() {
-    if ! open -Ra "$1" >/dev/null 2>&1; then
-        return 1
-    else
-        return 0
-    fi
+    open -Ra "$1" >/dev/null 2>&1
 }
 
 # is app running
@@ -120,11 +116,7 @@ is_url_open() {
 
 # is CLI command installed
 is_cmd_installed() {
-    if ! command -v "$1" >/dev/null 2>&1; then
-        return 1
-    else
-        return 0
-    fi
+    command -v "$1" >/dev/null 2>&1
 }
 
 # usage: check_plugin_dependencies "plugin-name" "cmd:jq" "cmd:osascript" "app:iTerm"
@@ -153,7 +145,7 @@ check_plugin_dependencies() {
         esac
     done
 
-    if (( ${#missing[@]} )); then
+    if (( ${#missing[@]} > 0 )); then
         log ERROR "Skipping $plugin_name: missing dependencies: ${missing[*]}"
         exit_or_return 0
     fi

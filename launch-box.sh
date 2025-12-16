@@ -84,21 +84,21 @@ setup_user_config() {
 # parse command line arguments
 parse_args() {
     local config_file="$LAUNCH_BOX_HOME/launch-config.json"
-    local dry=0
+    local dry_run=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
             -c|--config)
                 [[ $# -lt 2 ]] && { log ERROR "Missing value for $1"; usage; exit 2; }
                 config_file="$2"; shift 2 ;;
             -d|--dry-run)
-                dry=1; shift ;;
+                dry_run=1; shift ;;
             *)
                 log ERROR "Unknown option: $1"; usage; exit 2 ;;
         esac
     done
 
     # output parsed vals to stdout for caller capture
-    echo "$config_file $dry"
+    echo "$config_file $dry_run"
 }
 
 # validate field type helper
@@ -172,7 +172,7 @@ check_core_dependencies() {
         fi
     done
 
-    if ((${#missing[@]})); then
+    if (( ${#missing[@]} > 0 )); then
         log ERROR "Missing core dependencies: ${missing[*]}"
         return 1
     fi
@@ -183,7 +183,7 @@ check_core_dependencies() {
 
 # open URLs
 open_urls() {
-    local urls="$1" dry="$2"
+    local urls="$1" dry_run="$2"
     log INFO "Opening URLs..."
 
     if [[ -z "$urls" || "$urls" == "null" ]]; then
@@ -200,8 +200,8 @@ open_urls() {
         fi
 
         log INFO "Opening URL: '$url'"
-        if (( dry )); then
-            : # null command (dry run)
+        if (( dry_run )); then
+            : # no-op (dry run)
         else
             open "$url"
         fi
@@ -210,7 +210,7 @@ open_urls() {
 
 # launch apps
 open_apps() {
-    local apps="$1" dry="$2"
+    local apps="$1" dry_run="$2"
     log INFO "Opening Applications..."
 
     if [[ -z "$apps" || "$apps" == "null" ]]; then
@@ -231,7 +231,7 @@ open_apps() {
             fi
 
             log INFO "Opening application: '$app'"
-            if (( dry )); then
+            if (( dry_run )); then
                 : # no-op (dry run)
             else
                 open -a "$app"
@@ -245,7 +245,7 @@ open_apps() {
 
 # configure apps via plugins
 configure_apps() {
-    local plugins="$1" config_file="$2" dry="$3"
+    local plugins="$1" config_file="$2" dry_run="$3"
     log INFO "Configuring Applications..."
 
     if [[ -z "$plugins" || "$plugins" == "null" ]]; then
@@ -256,15 +256,13 @@ configure_apps() {
     # export config path for plugins to use
     export LAUNCH_BOX_CONFIG="$config_file"
 
-    local script_dir
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     while IFS= read -r plugin; do
         [[ -z "$plugin" ]] && continue
 
-        local plugin_path="$script_dir/plugins/$plugin.sh"
+        local plugin_path="$SCRIPT_DIR/plugins/$plugin.sh"
         if [[ -f "$plugin_path" ]]; then
             log INFO "Running plugin script: '$plugin'"
-            if (( dry )); then
+            if (( dry_run )); then
                 : # no-op (dry run)
             else
                 source "$plugin_path"
@@ -277,12 +275,10 @@ configure_apps() {
 
 # configure window layouts via Hammerspoon
 configure_layouts() {
-    local config_file="$1" dry="$2"
+    local config_file="$1" dry_run="$2"
     log INFO "Configuring Layouts..."
 
-    local script_dir
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local layout_script="$script_dir/layout/layout.sh"
+    local layout_script="$SCRIPT_DIR/layout/layout.sh"
 
     # check if layout script exists
     if [[ ! -f "$layout_script" ]]; then
@@ -291,7 +287,7 @@ configure_layouts() {
     fi
 
     # symlink config for Hammerspoon to read
-    if (( ! dry )); then
+    if (( ! dry_run )); then
         local config_json
         config_json="$(cd "$(dirname "$config_file")" && pwd)/$(basename "$config_file")"
         local hs_config_link="$HOME/.hammerspoon/plugins/launch-box-config.json"
@@ -301,7 +297,7 @@ configure_layouts() {
     fi
 
     # run layout script
-    if (( dry )); then
+    if (( dry_run )); then
         log INFO "Would run layout configuration"
     else
         source "$layout_script"
