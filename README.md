@@ -8,43 +8,63 @@ Every morning, you probably open the same browser tabs, launch the same apps, co
 
 ---
 
-## Setup
+## Installation
+
+### 1. Clone Repo & Install Dependencies
+
 ```bash
+# Clone repo
 git clone https://github.com/lukecassidy/launch-box.git
 cd launch-box
-chmod +x launch-box.sh
 
 # Install dependencies
-brew install jq hammerspoon figlet
+brew install jq
+brew install --cask hammerspoon
+```
+
+### 2. Run as macOS App (Recommended)
+
+This gives LaunchBox its own identity for system permissions:
+```bash
+./install-app.sh         # Normal installation (copies files)
+./install-app.sh --dev   # Dev mode (symlinks files)
+```
+
+This will:
+- Install LaunchBox.app to `/Applications` with its own permissions
+- Dev mode: symlinks files for live updates (no copying needed)
+- Launch via Spotlight (⌘+Space), Dock, or menu bar (using Shortcuts)
+
+> **Note:** You can also run `launch-box.sh` directly from Terminal without installing (see Running from Terminal for examples).
+
+---
+
+## Running from Terminal
+
+**Flags:**
+- `-c, --config <file>`  Use a custom config
+- `-d, --dry-run`        Print actions only
+- `-h, --help`           Show usage
+
+**Examples:**
+```bash
+./launch-box.sh                   # Use the default config (launch-config.json)
+./launch-box.sh -c work.json      # Use a custom config file
+./launch-box.sh -d                # Dry run
 ```
 
 ---
 
 ## Config
-The default config file is `launch-config.json` in the project root with four sections: `urls`, `apps`, `plugins`, and `layouts`.
+Edit `~/.launch-box/launch-config.json` (created on first run):
 
-`launch-config.json`:
 ```json
 {
-  "urls": [
-    "https://calendar.google.com/calendar/u/0/r/week",
-    "https://mail.google.com/mail/u/0/#inbox",
-    "https://github.com/notifications"
-  ],
-  "apps": [
-    "Visual Studio Code",
-    "Slack",
-    "iTerm"
-  ],
+  "urls": ["https://github.com/notifications"],
+  "apps": ["Visual Studio Code", "Slack", "iTerm"],
   "plugins": {
     "code": {},
-    "iTerm": {
-      "panes": [
-        "clear; figlet luke",
-        "clear; figlet is",
-        "clear; figlet cool"
-      ]
-    }
+    "iTerm": { "panes": ["echo hello", "echo world"] }
   },
   "layouts": {
     "single": {
@@ -57,72 +77,28 @@ The default config file is `launch-config.json` in the project root with four se
 }
 ```
 
-Sections:
-- **urls**: Any valid `http`/`https` links. Opened in your default browser.
-- **apps**: Must match names in `/Applications` (e.g. `Visual Studio Code`, `Google Chrome`, `Slack`).
-- **plugins**: Each entry corresponds to a script in `plugins/` for post launch app configuration (e.g. VS Code window merging, iTerm pane setup).
-- **layouts**: Hammerspoon window layout configurations for different screen setups.
-
----
-
-## Usage
-Flags
-- `-c, --config <file>`  Use a custom config
-- `-d, --dry-run`        Print actions only
-- `-h, --help`           Show usage
-
-Examples:
-```bash
-./launch-box.sh                   # Use the default config (launch-config.json)
-./launch-box.sh -c work.json      # Use a custom config file
-./launch-box.sh -d                # Dry run
-```
-
----
-
-## Installation
-
-You can run LaunchBox as a macOS app, run the shell script directly, or setup a menu bar shortcut. The app approach is recommended for easy permission management.
-
-### Option 1: Install as macOS App (Recommended)
-
-This gives LaunchBox its own identity for system permissions:
-
-```bash
-./install-app.sh         # Normal installation (copies files)
-./install-app.sh --dev   # Dev mode (symlinks files)
-```
-
-Installs **LaunchBox.app** to `/Applications` with its own system permissions.
-
-**Dev mode:** Use `--dev` to symlink scripts instead of copying them. Changes to source files will be immediately reflected when running the app.
-
-### Option 2: Run via Shell Script
-
-You can also run `launch-box.sh` directly from Terminal:
-
-```bash
-./launch-box.sh                   # Use the default config
-./launch-box.sh -c work.json      # Use a custom config file
-./launch-box.sh -d                # Dry run
-```
-
-### Option 3: Automator + Shortcuts
-
-1. Open Applications → Automator → New Document → Application
-2. Add "Run Shell Script" action
-3. Paste: `"/Path/to/launch-box/launch-box.sh" "$@"`
-4. Save as `Launch Box`
-5. Open Shortcuts → New Shortcut → Open App → Select `Launch Box`
-6. Click "i" icon & turn on 'Pin in Menu Bar'
+**Sections:**
+- `urls` – Any valid http/https links. Opened in your default browser.
+- `apps` – Must match names in /Applications (e.g. iTerm, Slack).
+- `plugins` – Extensible section for post application configuration.
+- `layouts` – Window layout configurations for different display setups.
 
 ---
 
 ## Troubleshooting
-If you encounter permission issues, grant **Accessibility** permissions to the app that runs `launch-box.sh`. Depending on your setup, this could be iTerm2, Shortcuts, Automator etc. You can do this via:
-- System Settings → Privacy & Security → Accessibility
 
-After granting access, try running the script again.
+**Permission Issues:**
+
+If you encounter permission errors when running launch-box:
+
+1. Grant **Accessibility** permissions to the app running the script
+2. Depending on your setup, this could be:
+   - LaunchBox.app
+   - iTerm2 or Terminal
+   - Shortcuts or Automator
+3. Navigate to: `System Settings → Privacy & Security → Accessibility`
+4. Add the relevant app and enable permissions
+5. Try running the script again
 
 ---
 
@@ -162,18 +138,15 @@ graph LR
     style Phase4 fill:#e8f5e9
 ```
 
-**4-Phase Execution:**
-1. **Open URLs** - Browser tabs from config
-2. **Launch Apps** - macOS applications
-3. **Run Plugins** - Extensible app-specific configuration
-4. **Apply Layouts** - Window positioning via Hammerspoon
 
 **Key Components:**
-- **launch-box.sh**: Main orchestrator
-- **Config JSON**: Single file drives all behavior (urls, apps, plugins, layouts)
-- **lib/common.sh**: Shared utilities (logging, validation, process management)
-- **plugins/**: Extensible system (code.sh for VS Code, iTerm.sh for terminal panes)
-- **layout/**: Hammerspoon integration for window management
+| Component       | Purpose                                                        |
+| --------------- | -------------------------------------------------------------- |
+| `launch-box.sh` | Main orchestrator                                              |
+| Config JSON     | Single file drives all behavior (urls, apps, plugins, layouts) |
+| `lib/common.sh` | Shared utilities (logging, validation, process management)     |
+| `plugins/`      | Extensible system                                              |
+| `layout/`       | Hammerspoon integration for window management                  |
 
 ---
 
