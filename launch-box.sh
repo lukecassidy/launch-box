@@ -101,6 +101,32 @@ parse_args() {
     echo "$config_file $dry"
 }
 
+# validate field type helper
+validate_field_type() {
+    local config="$1" field="$2" expected_type="$3"
+
+    if ! jq -e "(.$field == null) or (.$field | type == \"$expected_type\")" "$config" >/dev/null 2>&1; then
+        log ERROR "Config validation failed: '$field' must be $expected_type"
+        return 1
+    fi
+}
+
+# validate URL format helper
+validate_url_format() {
+    local config="$1"
+
+    # skip if urls field doesn't exist
+    if ! jq -e '.urls' "$config" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    # verify all URLs are valid strings with http(s) protocol
+    if ! jq -e '.urls | all(type == "string" and (startswith("http")))' "$config" >/dev/null 2>&1; then
+        log ERROR "Config validation failed: URLs must begin with http:// or https://"
+        return 1
+    fi
+}
+
 # check and validate config file
 check_config_file() {
     log INFO "Checking config file '$1'..."
@@ -112,13 +138,21 @@ check_config_file() {
     fi
 
     # validate JSON syntax
-    local count
-    count=$(jq '(.urls // [] | length) + (.apps // [] | length)' "$1" 2>&1) || {
+    if ! jq empty "$1" 2>/dev/null; then
         log ERROR "Config file contains invalid JSON syntax."
         return 1
-    }
+    fi
+
+    # validation checks
+    validate_field_type "$1" "urls" "array" || return 1
+    validate_field_type "$1" "apps" "array" || return 1
+    validate_field_type "$1" "plugins" "object" || return 1
+    validate_field_type "$1" "layouts" "object" || return 1
+    validate_url_format "$1" || return 1
 
     # warn if no URLs or apps defined
+    local count
+    count=$(jq '(.urls // [] | length) + (.apps // [] | length)' "$1" 2>/dev/null)
     if [[ "$count" -eq 0 ]]; then
         log WARNING "Config file is empty or has no URLs/apps defined"
     fi
@@ -126,30 +160,9 @@ check_config_file() {
     log INFO "Config file validated."
 }
 
-# parse config file once and return all data
-parse_config() {
-    local config_file="$1"
-
-    # parse entire config at once using jq
-    jq -r '{
-        urls: [.urls[]? // empty],
-        apps: [.apps[]? // empty],
-        plugins: [.plugins // {} | keys[]],
-        layouts: .layouts
-    }' "$config_file" 2>/dev/null
-}
-
-# validate URLs
-is_valid_url() {
-    if [[ "$1" =~ ^https?:// ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 # check if core dependencies are installed
 check_core_dependencies() {
+    log INFO "Checking core dependencies..."
     local -a deps=(open jq)
     local -a missing=()
 
@@ -181,21 +194,16 @@ open_urls() {
     while IFS= read -r url; do
         [[ -z "$url" ]] && continue
 
-        # validate and open URL
-        if is_valid_url "$url"; then
-            if is_url_open "$url"; then
-                log INFO "URL already open: '$url'"
-                continue
-            fi
+        if is_url_open "$url"; then
+            log INFO "URL already open: '$url'"
+            continue
+        fi
 
-            log INFO "Opening URL: '$url'"
-            if (( dry )); then
-                : # null command (dry run)
-            else
-                open "$url"
-            fi
+        log INFO "Opening URL: '$url'"
+        if (( dry )); then
+            : # null command (dry run)
         else
-            log WARNING "Invalid URL - '$url'"
+            open "$url"
         fi
     done <<< "$urls"
 }
@@ -322,22 +330,15 @@ main() {
     args=$(parse_args "$@")
     read -r config_file dry_run <<< "$args"
 
-    log INFO "Checking config file: '$config_file'..."
+    # check config file and core dependencies
     check_config_file "$config_file" || exit 1
-
-    log INFO "Checking core dependencies..."
     check_core_dependencies || exit 1
 
-    # parse config once
-    log INFO "Parsing config file..."
-    local config_data
-    config_data=$(parse_config "$config_file") || exit 1
-
-    # extract parsed data
+    # extract config data
     local urls apps plugins
-    urls=$(echo "$config_data" | jq -r '.urls[]?' 2>/dev/null)
-    apps=$(echo "$config_data" | jq -r '.apps[]?' 2>/dev/null)
-    plugins=$(echo "$config_data" | jq -r '.plugins[]?' 2>/dev/null)
+    urls=$(jq -r '.urls[]?' "$config_file" 2>/dev/null)
+    apps=$(jq -r '.apps[]?' "$config_file" 2>/dev/null)
+    plugins=$(jq -r '.plugins | keys[]?' "$config_file" 2>/dev/null)
 
     # open URLs
     open_urls "$urls" "$dry_run"

@@ -5,7 +5,7 @@
 __COMMON_SH_LOADED=1
 
 # Fallback for non-login shells
-HOME="${HOME:-$(eval echo ~$(whoami))}"
+HOME="${HOME:-$(cd ~ 2>/dev/null && pwd)}"
 PATH="$PATH:/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin"
 
 # logging
