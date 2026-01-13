@@ -1,6 +1,6 @@
 # launch‑box
 
-Open your daily tabs and apps on macOS with one command, powered by a simple config file.
+Open and configure your daily tabs and apps on macOS with one command, powered by a simple config file.
 
 Every morning, you probably open the same browser tabs, launch the same apps, configure them, and arrange windows the same way. This tool reads your config and does it all for you. What started as a small time saver for my morning routine ended up being something I use every day. So I kept refining it.
 
